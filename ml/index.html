@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning · Module 3 · NYU Stern MSBAi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #0d0a0c;
+  --surface: #161014;
+  --card:    #1b1418;
+  --border:  #2e1a21;
+  --accent:  #fb7185;
+  --accent-soft: rgba(251,113,133,.08);
+  --amber:   #fbbf24;
+  --green:   #34d399;
+  --red:     #f87171;
+  --text:    #f2ede6;
+  --muted:   #a97f8c;
+  --faint:   #402630;
+  --sidebar-w: 256px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Lora', Georgia, serif;
+  font-size: 16px; line-height: 1.75;
+  display: flex; min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(251,113,133,.04) 1px, transparent 1px);
+  background-size: 28px 28px; pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 400px;
+  background: radial-gradient(ellipse, rgba(251,113,133,.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── GATE ── */
+#gate { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.gate-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 44px; max-width: 360px; width: 90%; text-align: center; }
+.gate-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+.gate-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); margin-bottom: 24px; }
+.gate-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: .08em; outline: none; text-align: center; transition: border-color .2s; }
+.gate-input:focus { border-color: var(--accent); }
+.gate-btn { margin-top: 12px; width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: #0d0a0c; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; transition: opacity .2s; }
+.gate-btn:hover { opacity: .85; }
+.gate-err { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--red); margin-top: 10px; min-height: 16px; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: rgba(13,10,12,.97); border-right: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 100; padding: 24px 0 40px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.sb-brand { padding: 0 18px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.sb-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(251,113,133,.25); border-radius: 4px; padding: 3px 8px; margin-bottom: 8px; }
+.sb-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); line-height: 1.3; }
+.sb-sub { font-size: 12px; color: var(--muted); margin-top: 3px; font-style: italic; }
+.sb-group { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); padding: 14px 18px 5px; }
+.sb-nav a { display: flex; align-items: center; gap: 9px; padding: 7px 18px; text-decoration: none; font-size: 13px; color: var(--muted); transition: color .15s, background .15s; border-left: 2px solid transparent; }
+.sb-nav a:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.sb-nav a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+.sb-nav .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--faint); flex-shrink: 0; transition: background .15s; }
+.sb-nav a.active .dot { background: var(--accent); }
+.sb-back-row { border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.sb-back-row a { display: flex; align-items: center; gap: 8px; padding: 12px 18px; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .05em; color: var(--muted); transition: color .15s, background .15s; }
+.sb-back-row a:hover { color: var(--text); background: rgba(255,255,255,.03); }
+
+/* ── MAIN ── */
+#main { margin-left: var(--sidebar-w); flex: 1; position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+#hdr { padding: 48px 56px 32px; border-bottom: 1px solid var(--border); }
+.hdr-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.hdr-title { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--text); line-height: 1.15; margin-bottom: 6px; }
+.hdr-title span { color: var(--accent); }
+.hdr-sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; font-style: italic; }
+.day-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.day-tab { padding: 8px 20px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .07em; cursor: pointer; border: 1px solid var(--border); color: var(--muted); background: transparent; transition: all .2s; }
+.day-tab:hover { color: var(--text); border-color: var(--accent); }
+.day-tab.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+/* ── CONTENT ── */
+#content { padding: 36px 56px 80px; }
+.day-panel { display: none; }
+.day-panel.active { display: block; }
+
+/* ── SECTION CARD ── */
+.sc {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 16px; overflow: hidden;
+  transition: box-shadow .2s, transform .18s;
+  animation: fadeUp .45s cubic-bezier(.16,1,.3,1) both;
+}
+.sc:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+.sc.bl-accent { border-left: 3px solid var(--accent); }
+.sc.bl-amber  { border-left: 3px solid var(--amber); }
+.sc.bl-green  { border-left: 3px solid var(--green); }
+
+.sc-hdr { padding: 20px 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; user-select: none; transition: background .15s; }
+.sc-hdr:hover { background: rgba(255,255,255,.02); }
+.sc-hdr-l { display: flex; align-items: center; gap: 14px; }
+.sc-ico { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; background: var(--accent-soft); border: 1px solid rgba(251,113,133,.2); }
+.sc-ico.amber { background: rgba(251,191,36,.1); border-color: rgba(251,191,36,.2); }
+.sc-ico.green { background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.2); }
+.sc-tag { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+.sc-tag.amber { color: var(--amber); }
+.sc-tag.green { color: var(--green); }
+.sc-name { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); line-height: 1.25; }
+.chevron { color: var(--muted); transition: transform .25s; font-size: 14px; flex-shrink: 0; opacity: .7; }
+.sc.open .chevron { transform: rotate(180deg); }
+
+.sc-body { max-height: 0; overflow: hidden; transition: max-height .4s ease, opacity .3s ease; opacity: 0; }
+.sc.open .sc-body { max-height: 4000px; opacity: 1; }
+.sc-in { padding: 4px 28px 28px 80px; border-top: 1px solid var(--border); }
+
+/* ── PROSE ── */
+.sc-in p { margin-bottom: 14px; color: rgba(242,237,230,.88); }
+.sc-in p:last-child { margin-bottom: 0; }
+.sc-in strong, .sc-in b { color: var(--text); font-weight: 600; }
+.sc-in em { color: var(--accent); font-style: italic; }
+.sc-in ul { padding-left: 20px; margin-bottom: 14px; color: rgba(242,237,230,.85); }
+.sc-in li { margin-bottom: 7px; }
+.sc-in li::marker { color: var(--accent); }
+.sc-in ol { list-style: none; padding-left: 0; margin-bottom: 14px; counter-reset: step; }
+.sc-in ol li { counter-increment: step; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; color: rgba(242,237,230,.85); }
+.sc-in ol li::before { content: counter(step); flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); border: 1px solid rgba(251,113,133,.2); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 3px; }
+.sc-in h4 { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); margin: 22px 0 9px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+
+/* ── CALLOUT ── */
+.callout { background: var(--accent-soft); border: 1px solid rgba(251,113,133,.2); border-radius: 9px; padding: 15px 18px; margin: 16px 0; }
+.callout.amber { background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.22); }
+.callout.green { background: rgba(52,211,153,.07); border-color: rgba(52,211,153,.22); }
+.c-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 7px; }
+.callout.amber .c-label { color: var(--amber); }
+.callout.green .c-label { color: var(--green); }
+.callout p { color: rgba(242,237,230,.88); margin: 0; font-size: 14.5px; line-height: 1.65; }
+
+/* ── ANOMALY LIST (good/bad badges) ── */
+.anom-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.anom { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.anom-b { flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; border-radius: 5px; padding: 3px 8px; margin-top: 2px; white-space: nowrap; }
+.anom-b.bad { color: var(--red); background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); }
+.anom-b.ok  { color: var(--green); background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.2); }
+.anom-text { font-size: 14.5px; color: rgba(242,237,230,.82); line-height: 1.65; }
+.anom-text strong { color: var(--text); }
+
+/* ── TABLE ── */
+.dt { width: 100%; border-collapse: collapse; font-size: 14px; margin: 14px 0; }
+.dt th { background: var(--accent-soft); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.dt td { padding: 10px 14px; border-bottom: 1px solid rgba(46,26,33,.7); color: rgba(242,237,230,.82); vertical-align: top; line-height: 1.55; }
+.dt td:first-child { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap; }
+.dt td strong { color: var(--text); }
+.dt tr:last-child td { border-bottom: 0; }
+.dt tr:hover td { background: rgba(251,113,133,.03); }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: rgba(251,113,133,.09); color: var(--accent); border-radius: 4px; padding: 1px 6px; }
+
+/* ── ASSIGNMENTS ── */
+.assign-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 12px; display: flex; gap: 18px; align-items: flex-start; }
+.ac-ico { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); border: 1px solid rgba(251,113,133,.2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.ac-b { flex: 1; }
+.ac-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.ac-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); margin-bottom: 4px; }
+.ac-desc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+.ac-due { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 8px; }
+.ac-due span { color: var(--accent); }
+.done-badge { display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; background: rgba(52,211,153,.1); color: #34d399; border: 1px solid rgba(52,211,153,.2); border-radius: 20px; padding: 2px 8px; margin-left: 8px; }
+
+.divider { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); margin: 32px 0 14px; padding-left: 2px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-label">Machine Learning · Module 3</div>
+    <div class="gate-title">Daivik's Notes</div>
+    <input id="gate-input" class="gate-input" type="password" placeholder="password" autocomplete="off" />
+    <button class="gate-btn" onclick="tryUnlock()">Enter</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<nav id="sidebar" style="display:none">
+  <div class="sb-back-row"><a href="../">← Module 3 hub</a></div>
+  <div class="sb-brand">
+    <div class="sb-badge">ML · Module 3</div>
+    <div class="sb-title">Machine Learning</div>
+    <div class="sb-sub">Prof. Ravi Bapna</div>
+  </div>
+  <div class="sb-group">Day 1 — Mon Aug 17</div>
+  <div class="sb-nav">
+    <a href="#orientation"><span class="dot"></span>Orientation</a>
+    <a href="#three-is"><span class="dot"></span>The Three I's</a>
+    <a href="#unsupervised"><span class="dot"></span>Unsupervised Learning</a>
+    <a href="#assoc-theory"><span class="dot"></span>Association Rules</a>
+    <a href="#assoc-example"><span class="dot"></span>Worked Example</a>
+    <a href="#assoc-hyper"><span class="dot"></span>Hyperparameters</a>
+    <a href="#assoc-r"><span class="dot"></span>In R — BigBasket</a>
+    <a href="#clustering"><span class="dot"></span>Clustering & k-means</a>
+    <a href="#normalization"><span class="dot"></span>Normalization</a>
+    <a href="#clustering-r"><span class="dot"></span>In R — RFM</a>
+    <a href="#anomaly"><span class="dot"></span>Anomaly Detection (LOF)</a>
+    <a href="#supervised"><span class="dot"></span>Supervised Learning</a>
+    <a href="#splits"><span class="dot"></span>Train / Val / Test</a>
+    <a href="#evaluation"><span class="dot"></span>Evaluation & Roadmap</a>
+  </div>
+  <div class="sb-group">Reference</div>
+  <div class="sb-nav">
+    <a href="#hooks"><span class="dot"></span>Exam Hooks</a>
+  </div>
+</nav>
+
+<div id="main" style="display:none">
+  <div id="hdr">
+    <div class="hdr-eyebrow">NYU Stern · MSBAi · Module 3 · Machine Learning</div>
+    <h1 class="hdr-title">Machine <span>Learning</span></h1>
+    <p class="hdr-sub">Prof. Ravi Bapna · association rules · clustering · anomaly detection · supervised foundations</p>
+    <div class="day-tabs">
+      <button class="day-tab active" data-panel="day1">Day 1 — Mon Aug 17</button>
+      <button class="day-tab" data-panel="assignments">Assignments</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="panel-day1" class="day-panel active">
+      <div class="divider">Descriptive / Unsupervised — and the bridge into prediction</div>
+      
+      <div class="sc bl-accent open" id="orientation">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🧭</div>
+            <div>
+              <div class="sc-tag ">01 · Orientation</div>
+              <div class="sc-name">Who's teaching this, and how it runs</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>Ravi Bapna</b> — Chair Professor of Business Analytics &amp; Information Systems at U of Minnesota,
+moving to <b>Dean of the Leavey School of Business at Santa Clara</b> in seven days. Twelve years running the
+<b>Carlson Analytics Lab</b>, an AI/analytics consulting shop that runs live company projects.</p>
+<p>Work spans Fortune 500 industrials, healthcare (<b>Mayo Clinic</b>, <b>UnitedHealth Group</b>),
+retail (<b>Target</b>, <b>Best Buy</b>), and platforms (<b>OkCupid</b>, <b>Collage.com</b>), plus litigation
+consulting on state lawsuits against social media companies.</p>
+<div class="callout"><span class="c-label">Course philosophy</span>
+<p>Understand how the algorithms actually work <i>before</i> leaning on agents or no-code tools. Agentic
+platforms get demonstrated too — but students who only drive an agent without the math end up
+<b>passive consumers of algorithms rather than shapers of them</b>.</p></div>
+<h4>Structure</h4>
+<ul>
+<li><b>Days 1–2</b> — descriptive then predictive analytics</li>
+<li><b>Day 3</b> — causal + predictive (heterogeneous treatment effects) and explainability</li>
+<li><b>In-class prediction contest</b> — teams scored on <b>profit generated, not accuracy</b></li>
+<li>Post-module assignment follows</li>
+</ul>
+<h4>Tools</h4>
+<table class="dt">
+<tr><th>Tool</th><th>Role</th></tr>
+<tr><td>R 4.6.1</td><td>Primary environment. Some topics line by line, others at altitude.</td></tr>
+<tr><td>Mentorica</td><td>Agentic no-code platform co-built by the instructor. We stress-test the agent against hand-coded solutions.</td></tr>
+<tr><td>LLM coding assistants</td><td>Demo if time allows.</td></tr>
+</table>
+<div class="callout amber"><span class="c-label amber">Setup</span>
+<p>Set the working directory via the Files pane. <b>Double backslashes</b> on Windows paths.
+Download data and code from Brightspace <i>before</i> each session.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="three-is">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">💡</div>
+            <div>
+              <div class="sc-tag ">02 · Framing</div>
+              <div class="sc-name">The Three I's — why good models don't get used</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Companies collect enormous amounts of data and use <b>about 3%</b> of it for actual decision-making.
+Algorithms are intangible and sit in the background — deciding loans, dating matches, what you get
+recommended. Three barriers explain the gap:</p>
+<div class="anom-list">
+  <div class="anom"><span class="anom-b bad">Ignorance</span><div class="anom-text">Not knowing what is even possible.</div></div>
+  <div class="anom"><span class="anom-b bad">Inertia</span><div class="anom-text">Knowing, and resisting the change anyway.</div></div>
+  <div class="anom"><span class="anom-b bad">Imagination</span><div class="anom-text">Not seeing how a <i>simple</i> model applies creatively.</div></div>
+</div>
+
+<h4>3M — the inertia story</h4>
+<p>A Carlson student joined 3M's forecasting division to forecast revenue per business unit off
+<b>25 years</b> of history. She tried a range of time-series and deep-learning models, back-tested across
+the full period, and the winner was an <b>LSTM</b> (Long Short-Term Memory — a sequential deep-learning
+model). It projected a <b>6% revenue decline</b> for one business unit next quarter.</p>
+<p>Management pushed back: the LSTM is a black box and she couldn't say <i>which factors</i> drove the
+number. They rejected it and kept the existing process. <b>The actual decline was 5.5%.</b></p>
+<div class="callout"><span class="c-label">The fix</span>
+<p>Run a <b>shadow process</b> — model and legacy process in parallel, build trust over time, then switch.
+Day 3's explainability material exists precisely to avoid this trap.</p></div>
+
+<h4>Patterson Dental — the imagination story</h4>
+<p>Patterson Dental (Fortune 500 B2B dental supply) copied Amazon and promised next-day delivery to
+dentist offices. It produced <b>the worst operating-margin quarter in company history</b>.</p>
+<p>The mechanism: an office calls in the morning and orders; that gets packed and shipped. The same
+office calls again that evening and orders more — now requiring expedited shipping. Two shipments,
+one customer, one day.</p>
+<p>The fix was a <b>binary classification model</b>: will this office place a second order today? If yes,
+hold the morning shipment and consolidate. Every transaction already flowed through SAP, so the data
+existed. Return was in the <b>millions</b>.</p>
+<div class="callout green"><span class="c-label green">The lesson</span>
+<p>The most valuable projects are usually a <b>very simple model plus imagination</b>, not the most
+sophisticated algorithm.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="unsupervised">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🔍</div>
+            <div>
+              <div class="sc-tag ">03 · Foundations</div>
+              <div class="sc-name">Unsupervised learning — no label, no accuracy</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>Unsupervised learning</b> has no target variable and no label. The algorithm finds structure on
+its own. Three practical algorithms in this module:</p>
+<ol>
+<li><b>Association rule mining</b> — market basket analysis</li>
+<li><b>Clustering</b> — customer segmentation</li>
+<li><b>Anomaly detection</b> — finding the unusual</li>
+</ol>
+<div class="callout amber"><span class="c-label amber">The evaluation problem</span>
+<p>With no ground truth there is <b>no objective accuracy metric</b>. Evaluation is judgmental: is the
+output <i>actionable</i>? The standard validation is to run an <b>A/B test on top of the unsupervised
+output</b> to confirm the impact is causal.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="assoc-theory">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🛒</div>
+            <div>
+              <div class="sc-tag ">04 · Association Rules</div>
+              <div class="sc-name">Support, confidence, and why lift is the one that matters</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Association rule mining was the <b>first machine learning algorithm used commercially</b> — Bezos ran
+it on Amazon transaction data ~30 years ago, before rich customer profiles existed. Amazon started with
+books: nonperishable, easy to warehouse or drop-ship, and they attract a high-value, data-rich customer.
+Today <b>~30% of Amazon sales</b> come from recommendations built this way. "Customers who bought this
+also bought…" <i>is</i> this algorithm.</p>
+
+<h4>The setup</h4>
+<ul>
+<li>Input is a collection of <b>transactions</b>; each is a set of items — the market basket</li>
+<li><b>Only presence matters.</b> Quantity and price are ignored</li>
+<li>A rule is <b>If X then Y</b>: X is the antecedent / left-hand side, Y the consequent / right-hand side</li>
+<li>X and Y must be <b>non-overlapping</b> item sets</li>
+</ul>
+<p>With tens of thousands of SKUs the number of possible subsets runs to the billions — which is why you
+need an algorithm to find the interesting ones.</p>
+
+<h4>The three metrics</h4>
+<table class="dt">
+<tr><th>Metric</th><th>Definition</th><th>What it's for</th></tr>
+<tr><td>Confidence</td><td>P(Y | X) = transactions with X and Y ÷ transactions with X</td>
+<td>Strength of the rule. <b>Insufficient alone</b> — a popular item lands on the right-hand side of nearly every rule.</td></tr>
+<tr><td>Support</td><td>transactions with X and Y ÷ all transactions</td>
+<td>Prevalence. Filters out rare combinations not worth acting on.</td></tr>
+<tr><td>Lift</td><td>Support(X∩Y) ÷ [Support(X) × Support(Y)]<br>= Confidence(X→Y) ÷ P(Y)</td>
+<td><b>The real signal.</b> How much more often X and Y co-occur than if they were independent.</td></tr>
+</table>
+
+<div class="callout"><span class="c-label">Reading lift</span>
+<p><b>Lift = 1</b> → no relationship, exactly what chance predicts. <b>&gt; 1</b> → positive association.
+<b>&lt; 1</b> → negative association. Rule of thumb: look for <b>&gt; 1.5</b>, ideally <b>2+</b>;
+<b>4–5 is excellent</b>.</p></div>
+
+<div class="callout green"><span class="c-label green">The general principle</span>
+<p>Always compare model output against a sensible baseline. <b>Lift is just the formalisation of
+"compared to what?"</b> — that idea recurs all module.</p></div>
+
+<h4>Support, made concrete</h4>
+<p>If 4 transactions out of 1,000,000 contain both crickets and horse meat, confidence might be 80% —
+but support is <b>0.000004</b>. Not worth moving a shelf or running a campaign over.</p>
+<p>Typical starting values: support <b>1–2%</b> on large grocery data, confidence <b>60–80%</b>.</p>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="assoc-example">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🧮</div>
+            <div>
+              <div class="sc-tag ">05 · Worked Example</div>
+              <div class="sc-name">Eight transactions, computed by hand</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>The lesson of this example is that <b>confidence lies and lift corrects it</b>.</p>
+<h4>Apple → Beer</h4>
+<ul>
+<li>Confidence = <b>3/4 = 75%</b> — three of the four apple baskets also contain beer</li>
+<li>Support(apple) = 4/8 · Support(beer) = 6/8</li>
+<li>Independent baseline = (4/8) × (6/8) = <b>3/8</b></li>
+<li>Actual joint = <b>3/8</b></li>
+<li><b>Lift = (3/8) ÷ (3/8) = 1.0</b></li>
+</ul>
+<div class="callout amber"><span class="c-label amber">Read that again</span>
+<p>75% confidence looks like a strong rule. Lift of exactly <b>1.0</b> says there is <b>no relationship
+at all</b> — beer is simply popular and shows up everywhere. This is the trap.</p></div>
+<h4>Rice → Beer</h4>
+<ul>
+<li>Support(rice) = 4/8 · Support(beer) = 6/8 · joint = 4/8</li>
+<li><b>Lift = (4/8) ÷ [(4/8) × (6/8)] = 8/6 ≈ 1.33</b> — above 1, but still weak</li>
+</ul>
+<h4>Rules are directional</h4>
+<p>Apple → Beer and Beer → Apple are <b>two different rules</b>:</p>
+<ul>
+<li>Confidence(Apple → Beer) = 3/4 = <b>75%</b></li>
+<li>Confidence(Beer → Apple) = 3/6 = <b>50%</b></li>
+</ul>
+<p>The algorithm evaluates both directions independently and filters each against the minimum
+confidence threshold separately.</p>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="assoc-hyper">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">⚙️</div>
+            <div>
+              <div class="sc-tag ">06 · Hyperparameters</div>
+              <div class="sc-name">The apriori property and the practical loop</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Minimum support and minimum confidence are <b>hyperparameters</b> — you supply them, they are not
+estimated from data. There is no universal setting; it is iterative.</p>
+<div class="anom-list">
+  <div class="anom"><span class="anom-b bad">Too high</span><div class="anom-text">Zero rules returned.</div></div>
+  <div class="anom"><span class="anom-b bad">Too low</span><div class="anom-text">Billions of rules, all noise.</div></div>
+</div>
+<h4>The apriori property</h4>
+<p>If an item set has a given support, <b>no superset of it can have higher support</b>. If chocolate
+appears in 10% of transactions, chocolate + pears cannot exceed 10%. That single fact lets the algorithm
+prune the search space dramatically before confidence is ever applied — it is why this is tractable at
+all.</p>
+<h4>The loop</h4>
+<ol>
+<li>Set minimum support (e.g. 1%) and confidence (e.g. 75%)</li>
+<li>Run <code>apriori()</code> → a filtered set, ideally 20–100 rules</li>
+<li><b>Sort by lift, descending</b></li>
+<li>Inspect the top 5–10 for actionability</li>
+</ol>
+<div class="callout green"><span class="c-label green">Any data type works</span>
+<p>Bin numerics into categories (age → 18–25, 25–35, 35–45); one-hot encode categoricals as 0/1.
+That gets you rules like <i>if male AND age 25–35 AND tennis elbow → hip pain</i>. The algorithm doesn't
+care what the "items" are.</p></div>
+<h4>Beyond retail</h4>
+<ul>
+<li><b>Product placement</b> — closer together helps time-pressed shoppers (Manhattan); further apart
+drives impulse buys on the walk (suburban). The data-science answer is <b>an A/B test</b>, not an opinion</li>
+<li><b>Health insurance claims</b> — disease codes in a claim are structurally identical to items in a
+basket; co-occurrence reveals comorbidity. Same algorithm, different domain, only data-engineering
+imagination required</li>
+<li><b>App checkout</b> — Grofers (India) found app baskets smaller than in-store, and used rules to
+recommend add-ons at checkout</li>
+</ul>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="assoc-r">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">💻</div>
+            <div>
+              <div class="sc-tag ">07 · In R</div>
+              <div class="sc-name">BigBasket — 162,000 real transactions</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Real data from an Indian grocery retailer. <b>Most of the code is data engineering</b>; exactly one
+line is machine learning.</p>
+<h4>Data engineering</h4>
+<ol>
+<li>Load with <code>readxl</code> → <code>read_excel(..., sheet = 2)</code> — the file has two sheets and
+the data is on the second</li>
+<li>Lowercase column names, strip spaces</li>
+<li>Keep only order ID and item description; <code>unique()</code> to drop duplicates</li>
+<li>Group by order ID, convert to a <b>transactions</b> object via <code>arules</code></li>
+<li><code>inspect()</code> the first 5 to verify the structure</li>
+</ol>
+<h4>The one modelling line</h4>
+<p><code>apriori(data, parameter = list(support = 0.01, confidence = 0.75))</code></p>
+<p>If it returns zero rules, the thresholds are too tight — loosen support or confidence.</p>
+<h4>Results</h4>
+<table class="dt">
+<tr><th>Rank</th><th>Rule</th><th>Lift</th></tr>
+<tr><td>1</td><td>raw rice + urad dal + whole spices → <b>toor dal</b></td><td><b>5.0</b></td></tr>
+<tr><td>2</td><td>similar lentil / spice combination</td><td><b>4.9</b></td></tr>
+</table>
+<p>You can subset to rules where a specific item appears on the right-hand side — e.g. only toor dal.</p>
+<div class="callout amber"><span class="c-label amber">The accidental finding</span>
+<p><b>"Other vegetables"</b> shows up as a category — which means cashiers are using a catch-all label.
+The algorithm surfaced a <b>business process problem</b>, not a shopping pattern. Worth noticing: an
+unsupervised method found a data-quality defect nobody asked it to look for.</p></div>
+<div class="callout green"><span class="c-label green">For the capstone</span>
+<p>Association rules are a cheap exploratory tool even when they aren't the deliverable. Easy to run,
+and they surface things you weren't looking for.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="clustering">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🎯</div>
+            <div>
+              <div class="sc-tag ">08 · Clustering</div>
+              <div class="sc-name">k-means, SSE, and what makes a solution good</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Group many objects into a few meaningful segments with <b>no predefined labels</b>. You cannot send a
+million customers a million campaigns; three or four segments let you say distinct things at scale.
+Coke's arc: one mass ad in the 1980s → segmented campaigns → personalisation.</p>
+<h4>What "good" means</h4>
+<ul>
+<li><b>High intra-cluster similarity</b> — members of a cluster resemble each other</li>
+<li><b>Low inter-cluster similarity</b> — clusters sit far apart</li>
+</ul>
+<p>Measured by <b>Sum of Squared Errors (SSE)</b>: for each cluster, sum squared Euclidean distances from
+every point to its centroid, then add across clusters. <b>Lower SSE = tighter clusters.</b> It's how you
+compare solutions across different K and different random starts.</p>
+<h4>Distance metrics</h4>
+<table class="dt">
+<tr><th>Metric</th><th>Use</th></tr>
+<tr><td>Euclidean</td><td>The default. Pythagoras extended to any number of dimensions — identical maths in 2D, 20D or 1,400D.</td></tr>
+<tr><td>Manhattan</td><td>Sum of absolute differences — navigating city blocks.</td></tr>
+<tr><td>Jaccard</td><td>Binary data — presence/absence.</td></tr>
+</table>
+<p><b>Pandora</b> encodes each song into <b>400 musical dimensions</b> (distortion, rhythmic syncopation,
+dreamy lyrics…) hand-labelled by musicologists. The recommendation is a nearest-neighbour Euclidean
+calculation in 400-dimensional space — conceptually no harder than two.</p>
+<h4>The algorithm</h4>
+<ol>
+<li>Choose <b>K</b> — a hyperparameter, your call</li>
+<li>Randomly pick K points as initial centroids ("team captains")</li>
+<li>Assign every point to its nearest centroid by Euclidean distance</li>
+<li>Recompute each centroid as the <b>mean</b> of its members — it need not be an actual data point</li>
+<li>Reassign every point to the nearest updated centroid</li>
+<li>Repeat 4–5 until <b>no point changes cluster</b> (convergence)</li>
+</ol>
+<div class="callout"><span class="c-label">Always use multiple random starts</span>
+<p>Run <b>10+</b> and keep the lowest SSE. Different starts converge to different <b>local optima</b> —
+one start can hand you a materially worse answer with no warning. In R this is <code>nstart = 10</code>.</p></div>
+<h4>Choosing K</h4>
+<ul>
+<li><b>Business constraint</b> — "we have budget for 4 campaigns" → K = 4. Defer to practical reality</li>
+<li><b>Elbow curve</b> — plot SSE against K = 1…10 and find the sharpest flattening</li>
+<li>In practice the elbow is often <b>not sharp</b>; combine the maths with business input</li>
+</ul>
+<h4>Describing clusters</h4>
+<p>Add the cluster label back to the <b>un-normalised</b> data, then compute each cluster's centroid — the
+mean of every feature — and describe it in plain English. Mall of America: cluster 1 = young leisure
+shoppers, 7 hours in mall, 37 access points; cluster 2 = <b>basement employees</b> (useless for marketing);
+cluster 3 = theme-park visitors.</p>
+<div class="callout amber"><span class="c-label amber">The 1% cluster</span>
+<p>If a cluster holds ~1% of members, they are probably <b>anomalies rather than a segment</b>. Either
+reduce K, or hand those rows to anomaly detection. This connects directly to LOF below.</p></div>
+<p>Sweet spot for practical segmentation: <b>10–15 features</b> — enough to be informative, few enough to
+stay interpretable.</p>
+<h4>Airline case</h4>
+<p>A mid-size Minneapolis airline with no customer insight. Features engineered off the transaction/ERP
+system: flight frequency, days booked in advance, % round trips, solo vs group. <b>K = 5</b> gave
+one-way travellers (22%, 98% one-way trips), solo travellers (89% travel alone), and three more — five
+distinct messages instead of one generic blast.</p>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="normalization">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">⚖️</div>
+            <div>
+              <div class="sc-tag ">09 · Normalization</div>
+              <div class="sc-name">The step that silently decides your answer</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<div class="callout"><span class="c-label">The rule</span>
+<p><b>Whenever you see the word "similar," think normalization.</b> It applies to k-means, k-nearest
+neighbours, LOF, and every other distance-based method.</p></div>
+<p>Euclidean distance is dominated by whichever variable has the largest scale. Income in dollars
+(0–200,000) against height in metres (1.5–1.9): income overwhelms it completely and height contributes
+essentially nothing.</p>
+<p>The damning part — change the <i>units</i> (dollars → $100k units, metres → millimetres) and which
+variable dominates <b>reverses</b>. Same people, opposite clustering. The unit of measurement is not a
+modelling decision, so it must not drive the result.</p>
+<table class="dt">
+<tr><th>Method</th><th>Formula</th><th>When</th></tr>
+<tr><td>Min-max</td><td>(x − min) ÷ (max − min) → [0, 1]</td>
+<td>Preferred when the data includes binary 0/1 features, so everything shares a scale. <b>Caveat:</b> sensitive to future values beyond the current max.</td></tr>
+<tr><td>Z-score</td><td>(x − mean) ÷ standard deviation</td>
+<td>Centres at 0 with unit variance. More robust to future extremes, since mean and SD move less on one new outlier.</td></tr>
+</table>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="clustering-r">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">💻</div>
+            <div>
+              <div class="sc-tag ">10 · In R</div>
+              <div class="sc-name">RFM segmentation, 2,000 customers</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Features: monetary value, recency, frequency, tenure. <b>RFM</b> = Recency, Frequency, Monetary —
+the standard marketing segmentation frame.</p>
+<ol>
+<li><b>Inspect</b> — <code>str()</code> for types and dimensions; <code>skim()</code> for missing counts,
+completion rate, mean, SD, quartiles and an inline histogram</li>
+<li><b>Missing values</b> — replace numeric NAs with the column <b>median</b> (robust to skew)</li>
+<li><b>Normalize</b> — drop the ID column first (it is not a feature), then min-max column by column.
+Re-run <code>skim()</code> and confirm every mean sits in [0, 1]</li>
+<li><b>Elbow</b> — loop K = 1…10, <code>kmeans(..., nstart = 10)</code>, store
+<code>$tot.withinss</code>, plot with ggplot2. This dataset elbows at <b>K = 4</b></li>
+<li><b>Fit</b> — <code>set.seed()</code> then <code>kmeans(data, centers = 4, nstart = 10)</code>; append
+the cluster column to the <b>original un-normalised</b> frame</li>
+<li><b>Centroids</b> — group by cluster, mean each feature in original scale. Cluster 3 = high monetary,
+high frequency, high recency, long tenure = <b>the segment to defend</b></li>
+<li><b>Visualise</b> — a <b>parallel coordinates plot</b> shows every dimension at once, one line per
+cluster. This is the move when you have 20+ dimensions and 2D/3D plots are impossible</li>
+</ol>
+<div class="callout green"><span class="c-label green">Reading skim() output</span>
+<p><b>mean ≈ median</b> → roughly symmetric, mean imputation is fine.
+<b>mean ≫ median</b> → right-skewed, use median imputation.
+Wildly different column scales → that is your trigger to normalize.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="anomaly">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🚨</div>
+            <div>
+              <div class="sc-tag ">11 · Anomaly Detection</div>
+              <div class="sc-name">Local Outlier Factor (LOF)</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>LOF — Local Outlier Factor.</b> It finds points that are unusual <i>relative to their own local
+neighbourhood</i> in multi-dimensional space, rather than against a global threshold. A point is an
+outlier when <b>its neighbourhood is much less dense than its neighbours' neighbourhoods are</b>.</p>
+<table class="dt">
+<tr><th>Score</th><th>Meaning</th></tr>
+<tr><td>≈ 1</td><td>As dense as its neighbours — normal</td></tr>
+<tr><td>&gt; 1.5</td><td>Flag as an anomaly (rule of thumb)</td></tr>
+<tr><td>higher</td><td>More anomalous</td></tr>
+</table>
+<ul>
+<li>Key hyperparameter: <b>number of nearest neighbours (K)</b>, typically <b>3–5</b>, odd numbers preferred</li>
+<li><b>Always normalize first</b> — it is distance-based</li>
+<li>In R: <code>lof(data, minPts = 5)</code> from the <code>dbscan</code> package</li>
+<li>Output is a score for <b>every row</b></li>
+</ul>
+<p>Applications: fraud detection, network intrusion, quality control, people analytics, sensor monitoring.</p>
+<h4>Call centre case — the nephew and the superstar</h4>
+<p>Features: average tickets/day, customer rating, tardies, graveyard shifts, weekend shifts, sick days,
+and <b>% of sick days taken on a Friday</b>. Workflow: load → skim → normalize columns 2–11 → LOF with
+5 neighbours → plot the score density → filter <b>LOF &gt; 1.5</b>. Two people came out.</p>
+<div class="anom-list">
+  <div class="anom"><span class="anom-b bad">Negative outlier</span><div class="anom-text">
+    <b>The manager's nephew.</b> Rating <b>2.33</b> vs 3.49 average · 145 tickets/day vs 156 ·
+    3 tardies vs 1.46 · 1 graveyard shift vs 2 · <b>0</b> weekend shifts vs ~1 · <b>6 sick days vs ~2</b> ·
+    <b>83% of sick days on a Friday</b> vs 35% average. A data-driven case for HR action.</div></div>
+  <div class="anom"><span class="anom-b ok">Positive outlier</span><div class="anom-text">
+    <b>The superstar.</b> Rating <b>4.49</b> vs 3.49 · 165 tickets/day vs 156 · <b>0%</b> Friday sick days ·
+    above-average weekend shifts.</div></div>
+</div>
+<div class="callout"><span class="c-label">The point of the case</span>
+<p>The same algorithm, run once, found <b>both the worst and the best performer</b> in a 10–11 dimensional
+space — and neither would show up on any single-variable threshold.</p></div>
+<div class="callout green"><span class="c-label green">Free anomaly detection</span>
+<p>A k-means cluster with very few members is already telling you those points are far from everything
+else. <b>Clustering is a free preliminary anomaly screen</b> before you run LOF at all.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="supervised">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🎓</div>
+            <div>
+              <div class="sc-tag ">12 · Supervised Learning</div>
+              <div class="sc-name">Labels, leakage, and imbalance</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Now there <b>is</b> a labelled outcome, and the algorithm learns a mapping from inputs to output. The
+goal is a model that <b>generalises to unseen data</b>, not one that fits the training set.</p>
+<table class="dt">
+<tr><th>Type</th><th>Outcome</th></tr>
+<tr><td>Binary classification</td><td>0 or 1 — churn, default, malignant/benign</td></tr>
+<tr><td>Multi-class</td><td>One of several categories — object detection</td></tr>
+<tr><td>Numeric prediction</td><td>A continuous number — spend, revenue, price</td></tr>
+</table>
+<p>Binary classifiers output a <b>probability</b>, and <b>you choose the decision threshold</b>. Default 0.5,
+but it is a business decision, not a default to accept.</p>
+<h4>CRISP-DM</h4>
+<p>Business understanding → Data understanding → Data preparation → <b>Modeling</b> → <b>Evaluation</b> → Deployment.</p>
+<p>Modeling and evaluation are deliberately separate steps: <b>the data used to train must differ from the
+data used to evaluate</b>. And <b>~70% of project time</b> goes to data engineering and feature creation,
+not to running algorithms.</p>
+<h4>Two requirements people get wrong</h4>
+<div class="anom-list">
+  <div class="anom"><span class="anom-b bad">Both classes</span><div class="anom-text">
+    A commodities company supplied <b>10 years of contract data — wins only</b>. No losses, so no model
+    could be built. They had to spend another year collecting loss data first.</div></div>
+  <div class="anom"><span class="anom-b bad">No leakage</span><div class="anom-text">
+    Features must exist <b>at prediction time</b>. Screening resumes, you cannot use tardiness, LinkedIn
+    activity or performance reviews — a new applicant has none of those. Only the CV and cover letter
+    submitted at application are valid inputs.</div></div>
+</div>
+<h4>Class imbalance</h4>
+<p>If 95% of loans never default, a model that always predicts "no default" scores <b>95% accuracy</b> and
+is useless. Accuracy alone misleads — you need precision, recall and lift.</p>
+<ul>
+<li><b>SMOTE</b> (Synthetic Minority Oversampling Technique) — generate synthetic minority-class points to
+rebalance toward ~50/50</li>
+<li>Downsampling the majority also works but <b>throws away information</b>; oversampling is generally preferred</li>
+<li>Synthetic data has a second use: benchmark competing <b>vendor</b> models on data that mimics the real
+statistics without exposing protected patient or customer records</li>
+</ul>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="splits">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">✂️</div>
+            <div>
+              <div class="sc-tag ">13 · Train / Validation / Test</div>
+              <div class="sc-name">Why you lock the test set away on day one</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>A model evaluated on its own training data always looks better than it is. <b>Overfitting</b> = learning
+the noise as well as the signal; <b>underfitting</b> = too simple to catch the real pattern.</p>
+<ol>
+<li><b>Test set (holdout)</b> — randomly set aside <b>20–25%</b> at the very beginning. Lock it away.
+Do not touch it until the end</li>
+<li><b>Training set</b> — the remaining 75–80%, used to build models</li>
+<li><b>Validation set</b> — carved out of the training set, used for <b>hyperparameter tuning</b></li>
+</ol>
+<h4>K-fold cross-validation — the preferred approach</h4>
+<ul>
+<li>Split the training set into K folds (5 or 10)</li>
+<li>Each iteration holds out one fold for validation and trains on the other K−1</li>
+<li>Repeat K times — <b>every row validates exactly once</b></li>
+<li>Average across folds: far less noisy than a single validation split, and <b>no data is wasted</b></li>
+</ul>
+<div class="callout amber"><span class="c-label amber">Time series is the exception</span>
+<p>You <b>cannot</b> split randomly — that leaks the future into the past. Use sequential splitting with an
+<b>expanding window</b>: train on months 1–3 validate on 4; train on 1–4 validate on 5; and so on.</p></div>
+<div class="callout green"><span class="c-label green">The step people skip</span>
+<p>Once the architecture and hyperparameters are chosen, <b>re-fit on the full dataset</b> — training +
+validation + test — before deploying. The model is already selected; now use every row you have to
+estimate its parameters as precisely as possible.</p></div>
+<p>Rules of thumb: <b>75/25 or 80/20</b> train/test; within training, 70/10 or K-fold.</p>
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="evaluation">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">📊</div>
+            <div>
+              <div class="sc-tag ">14 · Evaluation & Roadmap</div>
+              <div class="sc-name">Lift curves, and the models still to come</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<h4>Evaluating</h4>
+<ul>
+<li><b>Accuracy</b> — proportion correct on the test set</li>
+<li><b>Confusion matrix</b> — actual vs predicted; exposes false positives and false negatives</li>
+<li><b>Lift</b> — sort the test set by predicted probability descending, then compare the conversion rate
+in the top N% against the random baseline</li>
+</ul>
+<div class="callout"><span class="c-label">Why lift is the business metric</span>
+<p>Bank loan campaign: no model, a 10% response rate on 50 invitees = <b>5 conversions</b>. Scoring the
+top 50 with a decision tree yielded <b>~43</b>; a neural network <b>~45</b>. At a $250K lifetime value per
+mortgage, those two extra conversions are worth <b>~$500K</b>.</p></div>
+<h4>Context decides what "good" means</h4>
+<p>Predicting whether the S&amp;P 500 rises tomorrow is historically ~50/50. A <b>55%</b> accurate model
+would be worth millions at a hedge fund. There is no universal accuracy bar.</p>
+<h4>The model roadmap</h4>
+<table class="dt">
+<tr><th>Model</th><th>Hyperparameter</th><th>Character</th></tr>
+<tr><td>Logistic regression</td><td>none</td><td>Interpretable. The baseline.</td></tr>
+<tr><td>k-nearest neighbours</td><td>K</td><td>Euclidean distance — <b>normalize first</b>.</td></tr>
+<tr><td>Decision tree</td><td>depth</td><td>Reads as a flowchart. Fully explainable.</td></tr>
+<tr><td>Ensembles</td><td>trees, depth</td><td>Random forests, boosting — many trees combined.</td></tr>
+<tr><td>Neural networks</td><td>hidden nodes, layers</td><td>Black box, high accuracy.</td></tr>
+</table>
+<p>Each more complex model extends the simpler ones — which is exactly why the foundations come first.</p>
+<h4>Decision tree, worked</h4>
+<p>2,500 bank customers; features include age, income, years of experience, mortgage, online account,
+credit-card average spend, CD account. Outcome: accepted the personal loan offer (0/1).</p>
+<p>A path to a "1": <b>income &lt; $106K → credit-card average &gt; $3 → CD account &gt; 0.5 → predict 1</b>.
+Score a new customer by walking them down the branches; the leaf gives the probability — 6 of 7 = <b>86%</b>.</p>
+<div class="callout green"><span class="c-label green">The trade-off in one line</span>
+<p>The tree is fully explainable and any manager can verify the logic. The neural network on the same
+data lifted top-50 conversions from <b>43 to 45</b> — and nobody can read it. That tension is the 3M
+story again, and Day 3's explainability material is the answer.</p></div>
+</div></div>
+      </div>
+      <div class="sc bl-green" id="hooks">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">⭐</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Exam hooks — the twelve things worth memorising</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<ol>
+<li><b>Lift = Confidence ÷ P(Y)</b> = Support(X∩Y) ÷ [Support(X)×Support(Y)]. Lift 1 = independence.</li>
+<li><b>Confidence alone is a trap</b> — popular consequents inflate it. Apple→Beer: 75% confidence, lift 1.0.</li>
+<li><b>Rules are directional.</b> Confidence(X→Y) ≠ Confidence(Y→X).</li>
+<li><b>Apriori property</b> — no superset has higher support than its subset. That's the pruning trick.</li>
+<li>Support and confidence are <b>hyperparameters</b>; lift is the metric you <b>sort by</b>.</li>
+<li><b>SSE</b> — sum of squared distances to centroids. Lower is tighter. Compares K values and random starts.</li>
+<li><b>Always <code>nstart</code> ≥ 10</b> — k-means converges to local optima.</li>
+<li><b>"Similar" ⇒ normalize.</b> Min-max for binary-inclusive data; Z-score when future outliers are likely.</li>
+<li>Cluster with <b>~1% of members = anomalies</b>, not a segment.</li>
+<li><b>LOF &gt; 1.5</b> = anomaly; minPts 3–5; normalize first; catches best <i>and</i> worst.</li>
+<li><b>Unsupervised has no accuracy metric</b> — validate with an A/B test.</li>
+<li><b>Re-fit on the full dataset</b> after model selection, before deployment. Time series never splits randomly.</li>
+</ol>
+</div></div>
+      </div>
+    </div>
+    <div id="panel-assignments" class="day-panel">
+      <div class="divider">Machine Learning — graded components</div>
+      
+      <div class="assign-card">
+        <div class="ac-ico">✅</div>
+        <div class="ac-b">
+          <div class="ac-label">Pre-module · 30%</div>
+          <div class="ac-title">Open-book individual quiz<span class="done-badge">✓ 30/30</span></div>
+          <div class="ac-desc">30 questions, open book, on Shmueli et al. Chapters 2, 6.1–6.3, 7, 9.1–9.8, 15.1, 16.1–16.3, 16.5.</div>
+          <div class="ac-due">Submitted <span>Aug 10</span> · 7 days early · Attempt 1 of 1</div>
+        </div>
+      </div>
+      <div class="assign-card">
+        <div class="ac-ico">🏆</div>
+        <div class="ac-b">
+          <div class="ac-label">In class · 30%</div>
+          <div class="ac-title">Group prediction contest</div>
+          <div class="ac-desc">Teams compete on a data science challenge. <b>Scored on profit generated, not accuracy</b> — the whole point of the lift material.</div>
+          <div class="ac-due">Runs <span>Day 2 · Tue Aug 18</span></div>
+        </div>
+      </div>
+      <div class="assign-card">
+        <div class="ac-ico">📝</div>
+        <div class="ac-b">
+          <div class="ac-label">Post-module · 40%</div>
+          <div class="ac-title">Final individual assignment</div>
+          <div class="ac-desc">Part 1 — opportunity template (15%). Part 2 — build a predictive model (25%).</div>
+          <div class="ac-due">Window opens <span>Aug 23</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'notes-unlocked', PWD = 'huncho';
+if (sessionStorage.getItem(KEY) === 'true') unlock();
+document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+function tryUnlock() {
+  if (document.getElementById('gate-input').value.trim().toLowerCase() === PWD) {
+    sessionStorage.setItem(KEY, 'true'); unlock();
+  } else {
+    document.getElementById('gate-err').textContent = 'wrong password';
+    document.getElementById('gate-input').value = '';
+  }
+}
+function unlock() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'block';
+  document.getElementById('main').style.display = 'block';
+}
+function toggle(hdr) { hdr.closest('.sc').classList.toggle('open'); }
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+const navLinks = document.querySelectorAll('.sb-nav a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+document.querySelectorAll('.sc[id]').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
