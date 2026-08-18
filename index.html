@@ -3,394 +3,511 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Module 3 · NYU Stern MSBAi · Daivik Suresh</title>
+<title>Module 3 · NYU Stern MSBAi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
 :root {
-  --nyu:        #57068C;
-  --nyu-deep:   #3B0460;
-  --nyu-bright: #7B29B8;
-  --nyu-soft:   rgba(87,6,140,.055);
-  --nyu-line:   rgba(87,6,140,.14);
+  --bg:          #0d0f18;
+  --surface:     #131627;
+  --card:        #161929;
+  --card-hover:  #1c2035;
+  --border:      rgba(255,255,255,.08);
+  --border-hover:rgba(255,255,255,.14);
+  --text:        #e8e9f3;
+  --muted:       #7b7fa8;
+  --faint:       #3d4060;
 
-  --bg:      #ffffff;
-  --surface: #FBF9FD;
-  --ink:     #1A1423;
-  --body:    #443C51;
-  --muted:   #756C82;
-  --faint:   #A79FB2;
-  --line:    rgba(26,20,35,.10);
+  --indigo:      #6366f1;
+  --lavender:    #818cf8;
 
-  --green:   #157F4A;
-  --green-s: rgba(21,127,74,.09);
-  --amber:   #9A6300;
-  --amber-s: rgba(154,99,0,.10);
+  --sky:         #38bdf8;
+  --sky-dim:     #0ea5e9;
+  --sky-glow:    rgba(56,189,248,.18);
+  --sky-soft:    rgba(56,189,248,.1);
+
+  --orange:      #fb923c;
+  --orange-dim:  #f97316;
+  --orange-glow: rgba(251,146,60,.18);
+  --orange-soft: rgba(251,146,60,.1);
+
+  --violet:      #a78bfa;
+  --violet-dim:  #7c3aed;
+  --violet-glow: rgba(167,139,250,.18);
+  --violet-soft: rgba(167,139,250,.1);
+
+
+  --rose:        #fb7185;
+  --rose-dim:    #e11d48;
+  --rose-glow:   rgba(251,113,133,.18);
+  --rose-soft:   rgba(251,113,133,.1);
+
+  --amber:       #fbbf24;
+  --amber-dim:   #d97706;
+  --amber-glow:  rgba(251,191,36,.18);
+  --amber-soft:  rgba(251,191,36,.1);
+
+  --cyan:        #22d3ee;
+  --cyan-dim:    #0891b2;
+  --cyan-glow:   rgba(34,211,238,.18);
+  --cyan-soft:   rgba(34,211,238,.1);
+
+  --emerald:     #34d399;
+  --emerald-dim: #10b981;
+  --emerald-glow:rgba(52,211,153,.18);
+  --emerald-soft:rgba(52,211,153,.1);
 }
 
 body {
-  background: var(--bg); color: var(--body);
-  font-family: 'Lora', Georgia, serif; font-size: 16px; line-height: 1.7;
-  -webkit-font-smoothing: antialiased;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Lora', Georgia, serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* ───────── gate ───────── */
-#gate { position: fixed; inset: 0; background: var(--nyu-deep); display: flex; align-items: center; justify-content: center; z-index: 100; }
-.gate-box { text-align: center; padding: 40px; max-width: 380px; width: 100%; }
-.gate-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: rgba(255,255,255,.5); margin-bottom: 14px; }
-.gate-title { font-family: 'DM Serif Display', serif; font-size: 34px; color: #fff; margin-bottom: 26px; letter-spacing: -.01em; }
-.gate-input { width: 100%; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.22); border-radius: 8px; padding: 13px 16px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 14px; text-align: center; outline: none; transition: border-color .2s, background .2s; }
-.gate-input::placeholder { color: rgba(255,255,255,.35); }
-.gate-input:focus { border-color: #fff; background: rgba(255,255,255,.13); }
-.gate-btn { width: 100%; margin-top: 12px; background: #fff; color: var(--nyu-deep); border: 0; border-radius: 8px; padding: 13px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; cursor: pointer; transition: opacity .2s; }
-.gate-btn:hover { opacity: .87; }
-.gate-err { color: #FFB4B4; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; margin-top: 13px; min-height: 16px; }
-
-/* ───────── shell ───────── */
-#main { display: none; }
-.wrap { max-width: 1020px; margin: 0 auto; padding: 0 32px; }
-
-/* ───────── masthead ───────── */
-header.mast { background: var(--nyu); color: #fff; padding: 54px 0 46px; border-bottom: 5px solid var(--nyu-deep); }
-.mast-top { display: flex; align-items: center; gap: 13px; margin-bottom: 30px; }
-.torch { width: 30px; height: 30px; flex-shrink: 0; }
-.mast-brand { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .3em; text-transform: uppercase; color: #fff; }
-.mast-brand span { color: rgba(255,255,255,.62); font-weight: 400; }
-h1.mast-title { font-family: 'DM Serif Display', serif; font-size: 62px; line-height: 1.02; letter-spacing: -.022em; color: #fff; margin-bottom: 14px; }
-h1.mast-title i { font-style: italic; color: rgba(255,255,255,.78); }
-.mast-sub { font-size: 17px; color: rgba(255,255,255,.82); max-width: 620px; }
-.mast-meta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
-.chip { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #fff; background: rgba(255,255,255,.13); border: 1px solid rgba(255,255,255,.24); border-radius: 20px; padding: 6px 14px; }
-.chip.solid { background: #fff; color: var(--nyu); border-color: #fff; font-weight: 700; }
-
-/* ───────── owner strip ───────── */
-.owner { background: var(--nyu-deep); color: rgba(255,255,255,.86); padding: 13px 0; }
-.owner-in { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .13em; text-transform: uppercase; }
-.owner-in b { color: #fff; font-weight: 700; }
-
-/* ───────── sections ───────── */
-section { padding: 52px 0; }
-.sec-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--nyu); margin-bottom: 9px; }
-.sec-title { font-family: 'DM Serif Display', serif; font-size: 31px; color: var(--ink); letter-spacing: -.015em; margin-bottom: 7px; }
-.sec-note { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
-
-/* ───────── course selector ───────── */
-.picker { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-.pick {
-  position: relative; text-align: left; cursor: pointer;
-  background: var(--bg); border: 1px solid var(--line); border-radius: 13px;
-  padding: 24px 22px 22px; font-family: 'Lora', serif;
-  display: flex; flex-direction: column;
-  transition: border-color .22s, box-shadow .22s, transform .22s, background .22s;
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(99,102,241,.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none; z-index: 0;
 }
-.pick::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: 13px 13px 0 0; background: var(--nyu-line); transition: background .22s, height .22s; }
-.pick:hover { transform: translateY(-3px); border-color: var(--nyu-line); box-shadow: 0 10px 30px rgba(87,6,140,.09); }
-.pick.on { border-color: var(--nyu); background: var(--nyu-soft); box-shadow: 0 10px 30px rgba(87,6,140,.13); }
-.pick.on::before { background: var(--nyu); height: 5px; }
-.pick-code { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .19em; text-transform: uppercase; color: var(--nyu); margin-bottom: 9px; }
-.pick-name { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--ink); line-height: 1.2; margin-bottom: 5px; }
-.pick-prof { font-size: 13.5px; color: var(--muted); font-style: italic; margin-bottom: 15px; }
-.pick .bar { margin-top: auto; }
-.bar { height: 5px; border-radius: 3px; background: rgba(87,6,140,.11); overflow: hidden; margin-bottom: 8px; }
-.bar i { display: block; height: 100%; border-radius: 3px; background: var(--nyu); }
-.pick-bank { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
-.pick-bank b { color: var(--nyu); }
-.pick-cue { margin-top: auto; padding-top: 15px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--faint); display: flex; align-items: center; gap: 6px; }
-.pick.on .pick-cue { color: var(--nyu); }
 
-/* ───────── study panel ───────── */
-#plan { margin-top: 30px; }
-.empty { border: 1px dashed var(--nyu-line); border-radius: 13px; padding: 44px 30px; text-align: center; color: var(--faint); font-family: 'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: .13em; text-transform: uppercase; }
-.panel { animation: rise .32s cubic-bezier(.2,.7,.3,1) both; }
-@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
-.panel-hd { border-left: 4px solid var(--nyu); padding: 3px 0 3px 18px; margin-bottom: 24px; }
-.panel-hd .ph-l { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--nyu); margin-bottom: 5px; }
-.panel-hd h3 { font-family: 'DM Serif Display', serif; font-size: 29px; color: var(--ink); letter-spacing: -.015em; line-height: 1.2; }
-.panel-hd p { color: var(--muted); font-size: 14.5px; margin-top: 4px; }
-
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 22px; align-items: start; }
-.box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px 24px; }
-.box-h { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--nyu); margin-bottom: 15px; padding-bottom: 9px; border-bottom: 1px solid var(--nyu-line); }
-
-.gr { display: flex; align-items: flex-start; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14.5px; }
-.gr:last-child { border-bottom: 0; padding-bottom: 0; }
-.gr-w { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; color: var(--nyu); flex-shrink: 0; width: 38px; padding-top: 3px; }
-.gr-b { flex: 1; }
-.gr-t { color: var(--ink); }
-.gr-s { font-size: 12.5px; color: var(--muted); font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; margin-top: 2px; }
-.tick { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; border-radius: 4px; padding: 2px 7px; white-space: nowrap; flex-shrink: 0; margin-top: 3px; }
-.tick.done { color: var(--green); background: var(--green-s); border: 1px solid rgba(21,127,74,.24); }
-.tick.live { color: var(--amber); background: var(--amber-s); border: 1px solid rgba(154,99,0,.24); }
-.tick.next { color: var(--nyu); background: var(--nyu-soft); border: 1px solid var(--nyu-line); }
-
-ol.study { counter-reset: st; list-style: none; }
-ol.study li { counter-increment: st; position: relative; padding: 0 0 16px 38px; font-size: 14.5px; line-height: 1.62; }
-ol.study li:last-child { padding-bottom: 0; }
-ol.study li::before { content: counter(st); position: absolute; left: 0; top: 1px; width: 24px; height: 24px; border-radius: 50%; background: var(--nyu); color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-ol.study li b { color: var(--ink); }
-ol.study li .why { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
-
-.flag { border-left: 3px solid var(--nyu); background: var(--nyu-soft); border-radius: 0 10px 10px 0; padding: 15px 20px; margin: 20px 0 0; }
-.flag.warn { border-left-color: var(--amber); background: var(--amber-s); }
-.flag-l { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .17em; text-transform: uppercase; color: var(--nyu); display: block; margin-bottom: 6px; }
-.flag.warn .flag-l { color: var(--amber); }
-.flag p { font-size: 14.5px; color: var(--body); }
-.flag p b { color: var(--ink); }
-
-.open-btn { display: inline-flex; align-items: center; gap: 9px; margin-top: 24px; background: var(--nyu); color: #fff; text-decoration: none; border-radius: 9px; padding: 13px 24px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; transition: background .2s, transform .2s; }
-.open-btn:hover { background: var(--nyu-deep); transform: translateY(-2px); }
-.open-btn.ghost { background: transparent; color: var(--nyu); border: 1px solid var(--nyu-line); margin-left: 10px; }
-.open-btn.ghost:hover { background: var(--nyu-soft); }
-.open-btn.dim { background: rgba(26,20,35,.07); color: var(--faint); pointer-events: none; }
-
-/* ───────── week ───────── */
-.week { background: var(--surface); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.wk { display: flex; gap: 16px; padding: 13px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
-.wk:last-child { border-bottom: 0; }
-.wk-d { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--nyu); width: 108px; flex-shrink: 0; font-weight: 700; }
-.wk-t { flex: 1; font-size: 14.5px; color: var(--body); }
-.wk-t b { color: var(--ink); }
-.wk.past .wk-d, .wk.past .wk-t { opacity: .42; }
-.wk.now { background: var(--nyu-soft); margin: 0 -16px; padding-left: 16px; padding-right: 16px; border-radius: 8px; }
-
-footer { padding: 34px 0 46px; color: var(--faint); font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-footer a { color: var(--nyu); text-decoration: none; }
-footer a:hover { text-decoration: underline; }
-
-@media (max-width: 860px) {
-  .wrap { padding: 0 20px; }
-  h1.mast-title { font-size: 40px; }
-  .picker { grid-template-columns: 1fr; }
-  .grid2 { grid-template-columns: 1fr; }
-  .wk { flex-direction: column; gap: 3px; }
-  .wk-d { width: auto; }
+body::after {
+  content: '';
+  position: fixed;
+  top: -200px; left: 50%;
+  transform: translateX(-50%);
+  width: 1000px; height: 400px;
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(56,189,248,.08) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 50%, rgba(167,139,250,.08) 0%, transparent 55%);
+  pointer-events: none; z-index: 0;
 }
+
+/* ── GATE ──────────────────────────────────── */
+#gate {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000; flex-direction: column; gap: 20px;
+}
+
+.gate-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 44px;
+  max-width: 360px; width: 90%;
+  text-align: center;
+}
+
+.gate-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 18px;
+}
+
+.gate-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px; color: var(--text);
+  margin-bottom: 24px; line-height: 1.3;
+}
+
+.gate-input {
+  width: 100%; padding: 10px 14px;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; letter-spacing: .08em;
+  outline: none; text-align: center;
+  transition: border-color .2s;
+}
+.gate-input:focus { border-color: var(--lavender); }
+
+.gate-btn {
+  margin-top: 12px; width: 100%;
+  padding: 10px; border-radius: 8px;
+  border: none; cursor: pointer;
+  background: var(--lavender); color: #0d0f18;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  transition: opacity .2s;
+}
+.gate-btn:hover { opacity: .85; }
+.gate-err {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: #f87171;
+  margin-top: 10px; min-height: 16px;
+}
+
+/* ── WRAPPER ────────────────────────────────── */
+.wrapper {
+  width: 100%; max-width: 860px;
+  margin: 0 auto;
+  padding: 72px 28px 96px;
+  position: relative; z-index: 1;
+}
+
+/* ── HEADER ─────────────────────────────────── */
+.course-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--lavender);
+  background: rgba(129,140,248,.1);
+  border: 1px solid rgba(129,140,248,.2);
+  border-radius: 20px; padding: 4px 14px;
+  display: inline-block; margin-bottom: 22px;
+}
+
+.page-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(36px,6vw,54px);
+  line-height: 1.15; color: var(--text);
+  margin-bottom: 10px; letter-spacing: -.01em;
+}
+.page-title em { font-style: italic; color: var(--lavender); }
+
+.page-sub {
+  font-size: 15px; color: var(--muted);
+  font-style: italic; margin-bottom: 28px;
+}
+
+.meta-row {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-bottom: 56px;
+}
+
+.meta-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 5px 12px;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ── SECTION LABEL ───────────────────────────── */
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--faint);
+  margin-bottom: 16px; padding-left: 2px;
+}
+
+/* ── CARDS GRID ─────────────────────────────── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px; margin-bottom: 56px;
+}
+@media (max-width: 640px) { .cards-grid { grid-template-columns: 1fr; } }
+
+/* ── COURSE CARD ────────────────────────────── */
+.course-card {
+  display: block; text-decoration: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px; padding: 28px 26px 24px;
+  position: relative; overflow: hidden; cursor: pointer;
+  transition: transform .22s cubic-bezier(.34,1.56,.64,1),
+              box-shadow .22s ease, border-color .22s ease,
+              background .22s ease;
+  animation: cardIn .5s ease both;
+}
+.course-card:nth-child(1) { animation-delay: .05s; }
+.course-card:nth-child(2) { animation-delay: .15s; }
+.course-card:nth-child(3) { animation-delay: .25s; }
+.course-card:nth-child(4) { animation-delay: .35s; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.course-card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 18px 18px 0 0;
+  transition: height .2s ease;
+}
+.course-card.sky::before     { background: linear-gradient(90deg, var(--sky-dim), var(--sky)); }
+.course-card.rose::before     { background: linear-gradient(90deg, var(--rose-dim), var(--rose)); }
+.course-card.orange::before  { background: linear-gradient(90deg, var(--orange-dim), var(--orange)); }
+.course-card.amber::before  { background: linear-gradient(90deg, var(--amber-dim), var(--amber)); }
+.course-card.violet::before  { background: linear-gradient(90deg, var(--violet-dim), var(--violet)); }
+.course-card.cyan::before  { background: linear-gradient(90deg, var(--cyan-dim), var(--cyan)); }
+.course-card.emerald::before { background: linear-gradient(90deg, var(--emerald-dim), var(--emerald)); }
+
+.course-card::after {
+  content: ''; position: absolute;
+  top: -60px; right: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  transition: opacity .22s ease, transform .22s ease;
+  opacity: 0; pointer-events: none;
+}
+.course-card.sky::after     { background: radial-gradient(circle, var(--sky-glow),     transparent 70%); }
+.course-card.rose::after     { background: radial-gradient(circle, var(--rose-glow),     transparent 70%); }
+.course-card.orange::after  { background: radial-gradient(circle, var(--orange-glow),  transparent 70%); }
+.course-card.amber::after  { background: radial-gradient(circle, var(--amber-glow),  transparent 70%); }
+.course-card.violet::after  { background: radial-gradient(circle, var(--violet-glow),  transparent 70%); }
+.course-card.cyan::after  { background: radial-gradient(circle, var(--cyan-glow),  transparent 70%); }
+.course-card.emerald::after { background: radial-gradient(circle, var(--emerald-glow), transparent 70%); }
+
+.course-card:hover { transform: translateY(-5px); border-color: var(--border-hover); background: var(--card-hover); }
+.course-card.sky:hover     { box-shadow: 0 12px 40px var(--sky-glow);     }
+.course-card.rose:hover     { box-shadow: 0 12px 40px var(--rose-glow);     }
+.course-card.orange:hover  { box-shadow: 0 12px 40px var(--orange-glow);  }
+.course-card.amber:hover  { box-shadow: 0 12px 40px var(--amber-glow);  }
+.course-card.violet:hover  { box-shadow: 0 12px 40px var(--violet-glow);  }
+.course-card.cyan:hover  { box-shadow: 0 12px 40px var(--cyan-glow);  }
+.course-card.emerald:hover { box-shadow: 0 12px 40px var(--emerald-glow); }
+.course-card:hover::before { height: 4px; }
+.course-card:hover::after  { opacity: 1; transform: scale(1.1); }
+
+.card-icon-wrap {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 18px;
+  border: 1px solid var(--border);
+  transition: border-color .2s ease;
+}
+.sky .card-icon-wrap     { background: var(--sky-soft);     }
+.rose .card-icon-wrap     { background: var(--rose-soft);     }
+.orange .card-icon-wrap  { background: var(--orange-soft);  }
+.amber .card-icon-wrap  { background: var(--amber-soft);  }
+.violet .card-icon-wrap  { background: var(--violet-soft);  }
+.cyan .card-icon-wrap  { background: var(--cyan-soft);  }
+.emerald .card-icon-wrap { background: var(--emerald-soft); }
+.sky:hover .card-icon-wrap     { border-color: rgba(56,189,248,.3);    }
+.orange:hover .card-icon-wrap  { border-color: rgba(251,146,60,.3);    }
+.violet:hover .card-icon-wrap  { border-color: rgba(167,139,250,.3);   }
+.emerald:hover .card-icon-wrap { border-color: rgba(52,211,153,.3);    }
+
+.card-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px; letter-spacing: .15em;
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.sky .card-tag     { color: var(--sky);     }
+.rose .card-tag     { color: var(--rose);     }
+.orange .card-tag  { color: var(--orange);  }
+.amber .card-tag  { color: var(--amber);  }
+.violet .card-tag  { color: var(--violet);  }
+.cyan .card-tag  { color: var(--cyan);  }
+.emerald .card-tag { color: var(--emerald); }
+
+.card-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px; color: var(--text);
+  line-height: 1.25; margin-bottom: 6px;
+}
+
+.card-prof {
+  font-size: 12.5px; color: var(--muted);
+  font-style: italic; margin-bottom: 20px;
+}
+
+.day-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+.day-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; padding: 3px 10px;
+  border-radius: 20px; border: 1px solid var(--border);
+  background: rgba(255,255,255,.03); color: var(--muted);
+  transition: background .2s, color .2s, border-color .2s;
+}
+.sky:hover .day-chip     { background: var(--sky-soft);     color: var(--sky);     border-color: rgba(56,189,248,.25);   }
+.orange:hover .day-chip  { background: var(--orange-soft);  color: var(--orange);  border-color: rgba(251,146,60,.25);   }
+.violet:hover .day-chip  { background: var(--violet-soft);  color: var(--violet);  border-color: rgba(167,139,250,.25);  }
+.emerald:hover .day-chip { background: var(--emerald-soft); color: var(--emerald); border-color: rgba(52,211,153,.25);   }
+
+.card-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: .04em; padding: 8px 16px;
+  border-radius: 8px; text-decoration: none;
+  transition: opacity .2s, transform .2s;
+}
+.course-card:hover .card-cta { transform: translateX(3px); }
+.sky .card-cta     { background: var(--sky-soft);     color: var(--sky);     }
+.rose .card-cta     { background: var(--rose-soft);     color: var(--rose);     }
+.orange .card-cta  { background: var(--orange-soft);  color: var(--orange);  }
+.amber .card-cta  { background: var(--amber-soft);  color: var(--amber);  }
+.violet .card-cta  { background: var(--violet-soft);  color: var(--violet);  }
+.cyan .card-cta  { background: var(--cyan-soft);  color: var(--cyan);  }
+.emerald .card-cta { background: var(--emerald-soft); color: var(--emerald); }
+
+/* ── PAGE HEADER (centered) ─────────────────── */
+.page-header {
+  text-align: center;
+  margin-bottom: 52px;
+}
+.page-header .course-pill  { margin-bottom: 22px; }
+.page-header .meta-row     { justify-content: center; margin-bottom: 0; }
+
+/* ── ENTRANCE ANIMATIONS ─────────────────────── */
+@keyframes heroFadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-header .course-pill  { animation: heroFadeUp .55s cubic-bezier(.16,1,.3,1) both .05s; }
+.page-header .page-title   { animation: heroFadeUp .60s cubic-bezier(.16,1,.3,1) both .15s; }
+.page-header .page-sub     { animation: heroFadeUp .55s cubic-bezier(.16,1,.3,1) both .27s; }
+.page-header .meta-row     { animation: heroFadeUp .55s cubic-bezier(.16,1,.3,1) both .38s; }
+.section-label             { animation: heroFadeUp .50s cubic-bezier(.16,1,.3,1) both .48s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-header .course-pill,
+  .page-header .page-title,
+  .page-header .page-sub,
+  .page-header .meta-row,
+  .section-label,
+  .course-card { animation: none !important; }
+}
+
+/* ── CARD PRESS STATE ────────────────────────── */
+.course-card:active {
+  transform: translateY(-2px) scale(0.985);
+  transition-duration: .08s;
+}
+
+/* ── FOOTER ──────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding-top: 28px; margin-top: 12px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.footer-left {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--faint); letter-spacing: .06em;
+}
+.m1-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--muted);
+  text-decoration: none; letter-spacing: .04em;
+  opacity: .7; transition: opacity .2s;
+}
+.m1-link:hover { opacity: 1; }
 </style>
 </head>
 <body>
 
+<!-- ── GATE ──────────────────────────────────── -->
 <div id="gate">
   <div class="gate-box">
-    <div class="gate-label">NYU Stern · MSBAi</div>
-    <div class="gate-title">Module 3</div>
-    <input type="password" id="gate-input" class="gate-input" placeholder="password" autocomplete="off">
+    <div class="gate-label">MSBAi · Module 3 · 2026</div>
+    <div class="gate-title">Daivik's Notes</div>
+    <input id="gate-input" class="gate-input" type="password" placeholder="password" autocomplete="off" />
     <button class="gate-btn" onclick="tryUnlock()">Enter</button>
     <div class="gate-err" id="gate-err"></div>
   </div>
 </div>
 
-<div id="main">
+<!-- ── MAIN ───────────────────────────────────── -->
+<div id="main" style="display:none; width:100%;">
+<div class="wrapper">
 
-<header class="mast">
-  <div class="wrap">
-    <div class="mast-top">
-      <svg class="torch" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M12 2c-1.7 2.2-2.6 3.9-2.6 5.4 0 1.6 1.1 2.3 1.1 3.6 0 .5-.2 1-.5 1.4 1.3-.3 2.2-1.4 2.2-2.8 0-.6-.1-1-.1-1.4 1.4 1.1 2.2 2.5 2.2 4 0 1.4-.7 2.6-1.8 3.4h1.9a1 1 0 0 1 1 1v.6a1 1 0 0 1-1 1H9.6a1 1 0 0 1-1-1v-.6a1 1 0 0 1 1-1h1.6C9.4 14.7 8.2 13 8.2 11c0-.9.2-1.7.6-2.5C7.6 9.7 7 11.2 7 12.8c0 .4 0 .8.1 1.1C6.4 12.8 6 11.5 6 10.1 6 6.9 8.4 4.2 12 2Z" fill="#fff"/>
-        <path d="M10 19.2h4l-.5 2.5a.9.9 0 0 1-.9.7h-1.2a.9.9 0 0 1-.9-.7L10 19.2Z" fill="#fff" opacity=".72"/>
-      </svg>
-      <div class="mast-brand">NYU STERN <span>· MSBAi</span></div>
-    </div>
-    <h1 class="mast-title">Module <i>Three</i></h1>
-    <p class="mast-sub">Machine Learning, Data Driven Decision Making, and Foundations of AI Agents — class notes, graded components, and what to study next.</p>
-    <div class="mast-meta">
-      <span class="chip solid">In person · Aug 17–22, 2026</span>
-      <span class="chip">KMC 1-70</span>
-      <span class="chip">6 credits · 3 courses</span>
-      <span class="chip">Post-module through Sep 27</span>
+  <div class="page-header">
+    <div class="course-pill">NYU Stern · MSBAi · Module 3</div>
+    <h1 class="page-title">Module 3<br /><em>Notes & Resources</em></h1>
+    <p class="page-sub">August 17–22, 2026 · In-person week, KMC 1-70</p>
+    <div class="meta-row">
+      <span class="meta-chip">📅 Aug 17–22</span>
+      <span class="meta-chip">📚 3 courses</span>
+      <span class="meta-chip">🎓 Bapna · Seamans · Lobel</span>
+      <span class="meta-chip">🗽 KMC 1-70</span>
     </div>
   </div>
-</header>
 
-<div class="owner">
-  <div class="wrap owner-in">
-    <div><b>Daivik Suresh</b> · MS in Business Analytics &amp; AI</div>
-    <div>Summer 2026 Cohort</div>
+  <div class="section-label">Courses</div>
+
+  <div class="cards-grid">
+
+    <a class="course-card rose" href="ml/">
+      <div class="card-icon-wrap">🤖</div>
+      <div class="card-tag">ML · 3 cr</div>
+      <div class="card-title">Machine Learning (using R)</div>
+      <div class="card-prof">Prof. Ravi Bapna</div>
+      <div class="day-chips">
+        <span class="day-chip">Aug 17–19</span>
+        <span class="day-chip">Association Rules</span>
+        <span class="day-chip">Clustering</span>
+        <span class="day-chip">LOF</span>
+        <span class="day-chip">Trees</span>
+      </div>
+      <span class="card-cta">Open notes →</span>
+    </a>
+
+    <a class="course-card amber" href="ddd/">
+      <div class="card-icon-wrap">⚖️</div>
+      <div class="card-tag">DDD · 2 cr</div>
+      <div class="card-title">Data Driven Decision Making</div>
+      <div class="card-prof">Prof. Rob Seamans</div>
+      <div class="day-chips">
+        <span class="day-chip">Aug 20–21</span>
+        <span class="day-chip">Causal Inference</span>
+        <span class="day-chip">Instrumental Variables</span>
+      </div>
+      <span class="card-cta">Notes coming →</span>
+    </a>
+
+    <a class="course-card cyan" href="agents/">
+      <div class="card-icon-wrap">🧠</div>
+      <div class="card-tag">AI Agents · 1 cr</div>
+      <div class="card-title">Foundations of AI Agents</div>
+      <div class="card-prof">Prof. Ilan Lobel</div>
+      <div class="day-chips">
+        <span class="day-chip">Sat Aug 22</span>
+        <span class="day-chip">n8n</span>
+        <span class="day-chip">Lovable</span>
+        <span class="day-chip">Hands-on lab</span>
+      </div>
+      <span class="card-cta">Notes coming →</span>
+    </a>
+
   </div>
+
+  <div class="site-footer">
+    <span class="footer-left">module3-stern-notes · daivik suresh</span>
+    <a class="m1-link" href="https://daivikxsuresh.github.io/module2-stern-notes/" target="_blank">← Module 2 notes</a>
+  </div>
+
 </div>
-
-<section>
-  <div class="wrap">
-    <div class="sec-label">Step 1</div>
-    <h2 class="sec-title">Pick a course</h2>
-    <p class="sec-note">Select one and you'll get its grade breakdown, where you actually stand, and the study order for what's left.</p>
-
-    <div class="picker">
-      <button class="pick" data-c="ml">
-        <div class="pick-code">Aug 17–19 · 3 cr</div>
-        <div class="pick-name">Machine Learning</div>
-        <div class="pick-prof">Prof. Ravi Bapna</div>
-        <div class="bar"><i style="width:30%"></i></div>
-        <div class="pick-bank"><b>30%</b> banked · 70% live</div>
-        <div class="pick-cue">Select →</div>
-      </button>
-
-      <button class="pick" data-c="ddd">
-        <div class="pick-code">Aug 20–21 · 2 cr</div>
-        <div class="pick-name">Data Driven Decision Making</div>
-        <div class="pick-prof">Prof. Rob Seamans</div>
-        <div class="bar"><i style="width:20%"></i></div>
-        <div class="pick-bank"><b>20%</b> banked · 80% live</div>
-        <div class="pick-cue">Select →</div>
-      </button>
-
-      <button class="pick" data-c="agents">
-        <div class="pick-code">Aug 22 · 1 cr</div>
-        <div class="pick-name">Foundations of AI Agents</div>
-        <div class="pick-prof">Prof. Ilan Lobel</div>
-        <div class="bar"><i style="width:30%"></i></div>
-        <div class="pick-bank"><b>30%</b> banked · 70% live</div>
-        <div class="pick-cue">Select →</div>
-      </button>
-    </div>
-
-    <div id="plan"><div class="empty">Select a course above</div></div>
-  </div>
-</section>
-
-<section class="week">
-  <div class="wrap">
-    <div class="sec-label">The week</div>
-    <h2 class="sec-title">In person · KMC 1-70</h2>
-    <p class="sec-note">Breakfast 8:00 · class 8:30–10:30 · break · 11:00–12:30 · lunch · 1:30–3:30 · break · 4:00–5:30</p>
-    <div class="wk past"><div class="wk-d">Mon Aug 17</div><div class="wk-t"><b>ML Day 1</b> — association rules, clustering, anomaly detection · <i>Capstone presentations 5:45pm</i></div></div>
-    <div class="wk now"><div class="wk-d">Tue Aug 18</div><div class="wk-t"><b>ML Day 2</b> — classification metrics, ensembles, numeric prediction</div></div>
-    <div class="wk"><div class="wk-d">Wed Aug 19</div><div class="wk-t"><b>ML Day 3</b> — last ML day. Post-module assignment opens Aug 23</div></div>
-    <div class="wk"><div class="wk-d">Thu Aug 20</div><div class="wk-t"><b>DDD Day 1</b> — causal inference · <i>SPIN Social 5:30–7:30pm with MS Global Finance</i></div></div>
-    <div class="wk"><div class="wk-d">Fri Aug 21</div><div class="wk-t"><b>DDD Day 2</b> — lunch is the Module 3 wrap and Module 4 preview</div></div>
-    <div class="wk"><div class="wk-d">Sat Aug 22</div><div class="wk-t"><b>AI Agents</b> — hands-on lab, four lectures, all tech setup must be done beforehand</div></div>
-  </div>
-</section>
-
-<div class="wrap">
-  <footer>
-    <div>NYU Stern · MSBAi · Module 3 · Daivik Suresh</div>
-    <div><a href="https://daivikxsuresh.github.io/msbai-tracker/module-3.html">Tracker →</a></div>
-  </footer>
-</div>
-
 </div>
 
 <script>
-const KEY = 'notes-unlocked', PWD = 'huncho';
-if (sessionStorage.getItem(KEY) === 'true') unlock();
-document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
-function tryUnlock() {
-  if (document.getElementById('gate-input').value.trim().toLowerCase() === PWD) { sessionStorage.setItem(KEY,'true'); unlock(); }
-  else { document.getElementById('gate-err').textContent = 'wrong password'; document.getElementById('gate-input').value = ''; }
-}
-function unlock() {
+const KEY = 'notes-unlocked';
+const PWD = 'huncho';
+if (sessionStorage.getItem(KEY) === 'true') {
   document.getElementById('gate').style.display = 'none';
   document.getElementById('main').style.display = 'block';
 }
-
-const COURSES = {
-  ml: {
-    name: 'Machine Learning',
-    prof: 'Prof. Ravi Bapna · 3 credits · in person Aug 17–19',
-    line: 'Traditional AI — supervised methods are five sixths of the course. Taught in R.',
-    grades: [
-      ['30%','Pre-module open-book quiz','30 questions · Shmueli Ch 2, 6.1–6.3, 7, 9.1–9.8, 15.1, 16','done','30/30'],
-      ['30%','In-class group prediction contest','Scored on profit generated, not accuracy','live','In class'],
-      ['40%','Post-module individual assignment','Part 1 opportunity template 15% · Part 2 build a model 25%','next','Opens Aug 23']
-    ],
-    study: [
-      ['Day 2 exam hooks — the fifteen items.','The whole day reduces to one question: what does being wrong cost, and in which direction? Everything else follows.'],
-      ['The metric decision tree.','Imbalanced → F1 or precision/recall. False negatives expensive → recall. Dollars available → profit matrix. Unsure → F1.'],
-      ['Lift and the profit matrix, cold.','The contest is scored on profit, not accuracy. Lift at your target N is the operative number.'],
-      ['The toolkit order.','KNN → logistic → tree → random forest → XGBoost → neural net. Ties go to the explainable model, or to fewer false negatives.'],
-      ['Lasso vs ridge.','L1 zeroes coefficients out, L2 only shrinks them. Lasso beat the neural network on catalog spend — complex is not better.'],
-      ['Then: Part 1 of the post-module, the opportunity template.','15% for framing a business opportunity. It needs no modelling and can be drafted before the window even opens.']
-    ],
-    flags: [
-      ['warn','Ask before Day 3 ends','Wednesday is your <b>last free access to Bapna.</b> The question worth the most: <b>can Part 2 be built on the capstone dataset?</b> DDD already allows the capstone org — if ML does too, one dataset carries three deliverables.']
-    ],
-    href: 'ml/', ready: true
-  },
-  ddd: {
-    name: 'Data Driven Decision Making',
-    prof: 'Prof. Rob Seamans · 2 credits · in person Aug 20–21',
-    line: 'Causal inference. Correlation versus causation, and the econometrics that separates them.',
-    grades: [
-      ['20%','Assignment 1 — individual','Scatter of education vs earnings, plus four questions','done','Submitted'],
-      ['20%','Assignment 2 — group, instrumental variables','Your side written; the group has to submit','live','Group'],
-      ['20%','Participation','Two days in the room, and it is a fifth of the grade','next','Aug 20–21'],
-      ['40%','Post-module group project','Argue a relationship is or is not causal. Capstone org is allowed.','next','Through Sep 27']
-    ],
-    study: [
-      ['Card &amp; Krueger 1994, before Thursday.','The minimum-wage natural experiment is the spine of the whole course. Know why the comparison group is the entire trick.'],
-      ['The Seamans IV handout.','What makes an instrument valid: correlated with the treatment, and affecting the outcome <i>only</i> through it.'],
-      ['Chan / Ghose / Seamans 2016 and Dittmar 2011.','He wrote one of them. Knowing which instrument each paper uses, and why, is participation points sitting on the table.'],
-      ['Your own capstone causal claim.','Dynamic pricing is a causal problem — the effect of <i>moving</i> price, not the correlation between price and demand. Have your instrument ready to say out loud.'],
-      ['Confirm someone actually submits A2.','It is the one item you cannot rescue alone.']
-    ],
-    flags: [
-      ['','Participation is 20%','Same weight as either written assignment, and it is decided in two days. Walking in with one real causal question about your own capstone is the cheapest twenty percent in Module 3.']
-    ],
-    href: 'ddd/', ready: false
-  },
-  agents: {
-    name: 'Foundations of AI Agents',
-    prof: 'Prof. Ilan Lobel · 1 credit · in person Sat Aug 22',
-    line: 'Four lectures and a hands-on lab: building an agent, architecture, front end and strategy, evaluation and deployment.',
-    grades: [
-      ['25%','Pre-module — Proxima Health case','Maya Chen plus six stakeholder interviews, one PDF','done','Submitted'],
-      ['5%','Tech setup','n8n, OpenWeather key, Google OAuth credentials','done','Aug 11'],
-      ['20%','Participation','The lab day itself','next','Aug 22'],
-      ['55%','Post-module — build and deploy your own agent','Demo day. The single largest graded item in Module 3.','next','Through Sep 27']
-    ],
-    study: [
-      ['Nothing to read. Get n8n under your hands instead.','The pre-module is fully banked. What is left is a build, and builds reward familiarity with the tool, not notes.'],
-      ['Wire one trivial end-to-end flow before Saturday.','Trigger → Gmail or Calendar → output. Thirty minutes now means Saturday is learning architecture rather than fighting credentials.'],
-      ['Watch for the Lovable setup email around Aug 20.','The only outstanding setup item. It arrives roughly two days before class.'],
-      ['Start thinking about what your agent actually does.','55% is the biggest single number in the module, and the strongest submissions solve a real problem the author already has.']
-    ],
-    flags: [
-      ['','This is your wheelhouse','Pre-module is banked and the remaining 75% is participation plus a build. Of the three courses this one has the highest ceiling and the lowest reading load.']
-    ],
-    href: 'agents/', ready: false
-  }
-};
-
-function render(key) {
-  const c = COURSES[key];
-  const grades = c.grades.map(g =>
-    `<div class="gr"><div class="gr-w">${g[0]}</div><div class="gr-b"><div class="gr-t">${g[1]}</div><div class="gr-s">${g[2]}</div></div><span class="tick ${g[3]}">${g[4]}</span></div>`
-  ).join('');
-  const study = c.study.map(s => `<li><b>${s[0]}</b><span class="why">${s[1]}</span></li>`).join('');
-  const flags = c.flags.map(f => `<div class="flag ${f[0]}"><span class="flag-l">${f[1]}</span><p>${f[2]}</p></div>`).join('');
-  const btn = c.ready
-    ? `<a class="open-btn" href="${c.href}">Open the notes →</a>`
-    : `<span class="open-btn dim">Notes not written yet</span>`;
-
-  document.getElementById('plan').innerHTML = `
-    <div class="panel">
-      <div class="panel-hd">
-        <div class="ph-l">Study plan</div>
-        <h3>${c.name}</h3>
-        <p>${c.prof}<br>${c.line}</p>
-      </div>
-      <div class="grid2">
-        <div class="box"><div class="box-h">Graded components</div>${grades}</div>
-        <div class="box"><div class="box-h">Study in this order</div><ol class="study">${study}</ol></div>
-      </div>
-      ${flags}
-      ${btn}
-      <a class="open-btn ghost" href="https://daivikxsuresh.github.io/msbai-tracker/module-3.html">Tracker →</a>
-    </div>`;
-}
-
-document.querySelectorAll('.pick').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.pick').forEach(x => x.classList.remove('on'));
-    b.classList.add('on');
-    render(b.dataset.c);
-    document.getElementById('plan').scrollIntoView({ behavior:'smooth', block:'nearest' });
-  });
+document.getElementById('gate-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryUnlock();
 });
+function tryUnlock() {
+  const val = document.getElementById('gate-input').value.trim().toLowerCase();
+  if (val === PWD) {
+    sessionStorage.setItem(KEY, 'true');
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+  } else {
+    document.getElementById('gate-err').textContent = 'wrong password';
+    document.getElementById('gate-input').value = '';
+  }
+}
 </script>
 </body>
 </html>
