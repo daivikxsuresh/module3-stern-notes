@@ -225,9 +225,31 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: 
     <a href="#splits"><span class="dot"></span>Train / Val / Test</a>
     <a href="#evaluation"><span class="dot"></span>Evaluation & Roadmap</a>
   </div>
+  <div class="sb-group">Day 2 — Tue Aug 18</div>
+  <div class="sb-nav">
+    <a href="#imbalance"><span class="dot"></span>Class Imbalance</a>
+    <a href="#confusion"><span class="dot"></span>Confusion Matrix</a>
+    <a href="#prf1"><span class="dot"></span>Precision / Recall / F1</a>
+    <a href="#threshold"><span class="dot"></span>Threshold, ROC & AUC</a>
+    <a href="#lift"><span class="dot"></span>Lift Curve</a>
+    <a href="#profit"><span class="dot"></span>Cost-Benefit Matrix</a>
+    <a href="#cancer"><span class="dot"></span>Case — Cancer Detection</a>
+    <a href="#unibank"><span class="dot"></span>Case — Universal Bank</a>
+    <a href="#selection"><span class="dot"></span>Model Selection</a>
+    <a href="#smote"><span class="dot"></span>SMOTE</a>
+    <a href="#missing"><span class="dot"></span>Missing Values</a>
+    <a href="#nnet"><span class="dot"></span>Neural Networks</a>
+    <a href="#ensembles"><span class="dot"></span>Ensembles</a>
+    <a href="#numeric"><span class="dot"></span>Numeric Prediction</a>
+    <a href="#regularization"><span class="dot"></span>Ridge / Lasso / Elastic Net</a>
+    <a href="#matrixfact"><span class="dot"></span>Matrix Factorisation</a>
+    <a href="#textanalytics"><span class="dot"></span>Text Analytics</a>
+    <a href="#tooling"><span class="dot"></span>R vs. the Agents</a>
+  </div>
   <div class="sb-group">Reference</div>
   <div class="sb-nav">
-    <a href="#hooks"><span class="dot"></span>Exam Hooks</a>
+    <a href="#hooks"><span class="dot"></span>Exam Hooks — Day 1</a>
+    <a href="#hooks2"><span class="dot"></span>Exam Hooks — Day 2</a>
   </div>
 </nav>
 
@@ -235,9 +257,10 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: 
   <div id="hdr">
     <div class="hdr-eyebrow">NYU Stern · MSBAi · Module 3 · Machine Learning</div>
     <h1 class="hdr-title">Machine <span>Learning</span></h1>
-    <p class="hdr-sub">Prof. Ravi Bapna · association rules · clustering · anomaly detection · supervised foundations</p>
+    <p class="hdr-sub">Prof. Ravi Bapna · association rules · clustering · anomaly detection · classification metrics · ensembles · numeric prediction</p>
     <div class="day-tabs">
       <button class="day-tab active" data-panel="day1">Day 1 — Mon Aug 17</button>
+      <button class="day-tab" data-panel="day2">Day 2 — Tue Aug 18</button>
       <button class="day-tab" data-panel="assignments">Assignments</button>
     </div>
   </div>
@@ -880,6 +903,978 @@ story again, and Day 3's explainability material is the answer.</p></div>
 <li><b>Unsupervised has no accuracy metric</b> — validate with an A/B test.</li>
 <li><b>Re-fit on the full dataset</b> after model selection, before deployment. Time series never splits randomly.</li>
 </ol>
+</div></div>
+      </div>
+    </div>
+
+    <div id="panel-day2" class="day-panel">
+
+      <div class="divider">Evaluating a classifier — the metric <i>is</i> the decision</div>
+
+      <div class="sc bl-accent" id="imbalance">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">⚖️</div>
+            <div>
+              <div class="sc-tag ">01 · Framing</div>
+              <div class="sc-name">When 94% accuracy means you did nothing</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The churn dataset is <b>94% no-churn, 6% churn</b> — the classic imbalanced-class problem. Predict
+"nobody churns" for every row and you score <b>94% accuracy having built nothing at all</b>. That is the
+whole argument against accuracy as a default metric.</p>
+
+<h4>Two things to do the moment you see imbalance</h4>
+<ol>
+<li><b>Reset expectations.</b> The modelling is harder and raw performance numbers will look worse. That
+is the data, not your failure.</li>
+<li><b>Switch metrics.</b> Precision, recall and F1 become primary; accuracy becomes a footnote.</li>
+</ol>
+
+<div class="callout"><span class="c-label">Rule of thumb</span>
+<p>Any time a class sits under <b>~20%</b> of the data, start thinking in precision and recall before you
+fit anything. Below ~5% you also need to fix the training data itself — see SMOTE.</p></div>
+
+<div class="callout green"><span class="c-label green">The general principle</span>
+<p>Same idea as lift on Day 1: <b>"compared to what?"</b> An accuracy number without its baseline is
+not a result. The baseline here is the majority-class rule, and it is free.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="confusion">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🔲</div>
+            <div>
+              <div class="sc-tag ">02 · Metrics</div>
+              <div class="sc-name">The confusion matrix and its four cells</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>Layout used in class: <b>rows = what the model predicted, columns = reality.</b> (Conventions differ
+between textbooks and R packages — always check which way round the table is before reading numbers off it.)</p>
+
+<h4>The running example — 100 test rows</h4>
+<table class="dt">
+<tr><th>Cell</th><th>Count</th><th>Meaning</th></tr>
+<tr><td>TP</td><td><b>40</b></td><td>Predicted churn, actually churned — <b>caught it</b></td></tr>
+<tr><td>FP</td><td><b>10</b></td><td>Predicted churn, did not churn — <b>false alarm</b></td></tr>
+<tr><td>FN</td><td><b>30</b></td><td>Predicted no churn, actually churned — <b>missed it</b></td></tr>
+<tr><td>TN</td><td><b>20</b></td><td>Predicted no churn, did not churn — correct pass</td></tr>
+</table>
+
+<p><b>Accuracy</b> = (TP + TN) ÷ total = (40 + 20) ÷ 100 = <b>60%</b>. And on the 94/6 churn data, the
+do-nothing model beats that with 94%. Which is the point.</p>
+
+<div class="callout amber"><span class="c-label amber">Reading the table fast</span>
+<p>The first letter says <b>whether the model was right</b> (True / False). The second says <b>what the
+model predicted</b> (Positive / Negative). So a <b>False Negative</b> = the model said negative and was
+wrong. Decode it that way and you never have to memorise the grid.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="prf1">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🎯</div>
+            <div>
+              <div class="sc-tag ">03 · Metrics</div>
+              <div class="sc-name">Precision, recall, F1 — and which one to fight for</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>Precision — "P lines up with Predictions"</h4>
+<p>Of everything the model <b>flagged</b>, how much was real?</p>
+<p><code>Precision = TP / (TP + FP)</code> = 40 / 50 = <b>80%</b></p>
+<p>Denominator is the model's own positive calls. <b>High precision with low recall = too conservative</b> —
+it only speaks when certain, and misses most of the real cases.</p>
+
+<h4>Recall (sensitivity) — "R lines up with Reality"</h4>
+<p>Of everything that <b>actually was</b> positive, how much did the model catch?</p>
+<p><code>Recall = TP / (TP + FN)</code> = 40 / 70 = <b>57%</b></p>
+<p>Denominator is reality. <b>High recall with low precision = too many false alarms</b> — it flags
+everything, so being flagged means little.</p>
+
+<h4>F1 — the harmonic mean</h4>
+<p><code>F1 = 2 × (P × R) / (P + R)</code> = 2 × (0.80 × 0.571) / (0.80 + 0.571) = <b>66.7%</b></p>
+<p>The harmonic mean <b>skews toward the lower of the two</b>, so you cannot buy a good F1 by maxing one
+metric and abandoning the other. That is exactly what it is for.</p>
+
+<div class="callout"><span class="c-label">Shortcut worth knowing</span>
+<p>F1 also equals <code>2·TP / (2·TP + FP + FN)</code> — here 80 / 120 = 66.7%. Same answer, no decimals,
+and it makes the structure obvious: <b>TN never appears in F1 at all.</b> That is why F1 survives class
+imbalance — the giant true-negative block cannot inflate it.</p></div>
+
+<div class="callout amber"><span class="c-label amber">The trap Bapna called out</span>
+<p>A model with <b>precision = 100% and recall = 1/51</b> is useless. It found one case, was right about
+it, and missed fifty. Perfect precision is trivially achievable by predicting positive exactly once —
+which is why precision is never reported alone.</p></div>
+
+<div class="callout green"><span class="c-label green">Which to prioritise</span>
+<p>Ask what the expensive error is. In <b>cancer, fraud and churn</b>, a false negative — the missed case —
+is the costly one, so <b>skew toward recall</b>. When acting on a flag is expensive and the miss is cheap,
+skew toward precision. When you genuinely don't know: <b>F1</b>.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="threshold">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🎚️</div>
+            <div>
+              <div class="sc-tag ">04 · Metrics</div>
+              <div class="sc-name">Threshold tuning, the ROC curve, and AUC</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>0.5 is not sacred</h4>
+<p>Classifiers output a <b>probability</b>; the cutoff that turns it into a class is a choice you make.
+The default of 0.5 has no special status.</p>
+<ul>
+<li><b>Raise</b> the threshold → fewer positive calls → precision up, recall down</li>
+<li><b>Lower</b> the threshold → more positive calls → recall up, precision down</li>
+</ul>
+<p>Every cutoff produces a <b>different confusion matrix and different metrics from the same model</b>.
+In the class example a cutoff of 0.8 gave 19/24 correct; 0.5 gave 21/24. The practical move is to sweep
+every cutoff and keep the one that optimises your chosen metric.</p>
+
+<h4>ROC curve</h4>
+<ul>
+<li><b>y-axis</b> = true positive rate (recall) · <b>x-axis</b> = false positive rate</li>
+<li>Each point on the curve <b>is one cutoff value</b></li>
+<li>Better models bow toward the <b>top-left corner</b> — high catch rate, few false alarms</li>
+<li>R and Python compute it automatically; you never iterate by hand</li>
+</ul>
+
+<h4>AUC — area under that curve</h4>
+<p>One number summarising performance <b>across all possible cutoffs</b>, which is why it is the metric
+of choice when the class balance is skewed or the cost structure is still unknown.</p>
+<table class="dt">
+<tr><th>AUC</th><th>Verdict</th></tr>
+<tr><td>&lt; 0.70</td><td>Not useful</td></tr>
+<tr><td>0.70 – 0.80</td><td>Acceptable</td></tr>
+<tr><td>0.80 – 0.90</td><td>Good</td></tr>
+<tr><td>&gt; 0.90</td><td><b>Excellent</b></td></tr>
+</table>
+
+<div class="callout green"><span class="c-label green">Why AUC is threshold-free</span>
+<p>Precision, recall and F1 all describe <b>one operating point</b>. AUC describes the <b>whole ranking</b>.
+So AUC answers "is this model any good?" while precision/recall answer "is this <i>setting</i> any good?"
+You need both, and in that order.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="lift">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">📈</div>
+            <div>
+              <div class="sc-tag ">05 · Metrics</div>
+              <div class="sc-name">The lift curve — the one executives actually read</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The business-facing complement to ROC. <b>x-axis</b> = share of the population you target,
+<b>y-axis</b> = lift over targeting at random.</p>
+<p><code>Lift = model response rate ÷ baseline response rate</code></p>
+<p>Universal Bank: the top 50 prospects returned <b>46 hits versus ~5 expected</b> from a random 50 —
+roughly <b>9× lift</b>.</p>
+
+<div class="callout"><span class="c-label">The insight worth keeping</span>
+<p><b>Global accuracy can be mediocre while lift in the top decile is excellent.</b> If you only have
+budget to call 50 people, you do not care how the model ranks person 400 — you care that the top 50 are
+dense with responders. <b>Don't kill a model on overall accuracy without checking lift at your actual N.</b></p></div>
+
+<div class="callout green"><span class="c-label green">Why this matters for the contest</span>
+<p>The prediction contest is scored on <b>profit generated, not accuracy</b>. That makes lift and the
+cost-benefit matrix the operative tools — not the metric leaderboard.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="profit">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">💵</div>
+            <div>
+              <div class="sc-tag ">06 · Decisions</div>
+              <div class="sc-name">Cost-benefit — when you have dollars, use dollars</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>If you can put a dollar value on each cell of the confusion matrix, you no longer need a proxy metric.
+<b>Optimise money directly.</b></p>
+
+<table class="dt">
+<tr><th>Cell</th><th>Value</th><th>Why</th></tr>
+<tr><td>TP</td><td><b>+$10,000</b></td><td>Acquired the customer</td></tr>
+<tr><td>TN</td><td>+$10</td><td>Saved the cost of annoying someone</td></tr>
+<tr><td>FP</td><td>−$800</td><td>Targeted someone who was never going to respond</td></tr>
+<tr><td>FN</td><td><b>−$8,000</b></td><td>Missed a customer who would have said yes</td></tr>
+</table>
+
+<p><code>Expected profit = (TP × 10,000) + (TN × 10) + (FP × −800) + (FN × −8,000)</code></p>
+
+<div class="callout amber"><span class="c-label amber">What this quietly does</span>
+<p>The profit matrix <b>sets your threshold for you</b>. A false negative here costs 10× a false positive,
+so the profit-maximising cutoff sits well below 0.5 — the maths tells you to over-flag. You never have to
+argue about precision-versus-recall again; the dollars settle it.</p></div>
+
+<p>In the Universal Bank run the <b>decision tree won on both F1 and expected profit</b> — but that
+agreement is not guaranteed. When the metric and the money disagree, the money is the answer.</p>
+
+</div></div>
+      </div>
+      <div class="divider">Two cases, end to end</div>
+
+      <div class="sc bl-accent" id="cancer">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🔬</div>
+            <div>
+              <div class="sc-tag ">07 · Case</div>
+              <div class="sc-name">Cancer detection — 569 biopsies, six models</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>Dataset: <b>569 patients, 30 numeric biopsy measurements</b>, two classes (malignant = 1, benign = 0).
+Split <b>62% benign / 38% malignant</b> — not severely imbalanced, so accuracy is actually usable here.</p>
+
+<h4>The agent-run pipeline (daik.bot / Mentorika), observed end to end</h4>
+<ol>
+<li>Loaded the CSV, dropped the ID column, encoded M = 1 / B = 0</li>
+<li><b>75/25 train-test split with feature scaling</b> (normalisation)</li>
+<li>Fit six models: logistic regression, decision tree, KNN, random forest, gradient boosting, MLP</li>
+<li>Computed accuracy, precision, recall, F1, AUC and a confusion matrix for each</li>
+<li>Plotted ROC curves across models</li>
+</ol>
+
+<h4>Results</h4>
+<p><b>Random forest won on accuracy.</b> Its confusion matrix: <b>90 TN · 0 FP · 4 FN · 49 TP</b>
+(143 rows — the 25% holdout of 569).</p>
+
+<div class="callout amber"><span class="c-label amber">Why the winner was still the wrong pick</span>
+<p>Those <b>4 false negatives are malignant tumours called benign</b> — the clinically dangerous error.
+Zero false positives looks impressive and is worth almost nothing here: a false positive costs a follow-up
+scan, a false negative costs a life. <b>Trade false positives for false negatives all day in this domain.</b></p></div>
+
+<p>The <b>neural network</b> had the lowest false-negative count at <b>3</b>, with 96.5% accuracy and
+<b>AUC 0.992</b> (KNN was essentially tied at 0.991).</p>
+
+<div class="callout green"><span class="c-label green">The decision rule</span>
+<p><b>When two models have similar accuracy, pick the one with fewer false negatives</b> — in a domain
+where the false negative is the expensive error. That is a domain judgement, not a statistical one, and
+it is the part the leaderboard will never tell you.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="unibank">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🏦</div>
+            <div>
+              <div class="sc-tag ">08 · Case</div>
+              <div class="sc-name">Universal Bank — the full R pipeline, end to end</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p><b>Business problem:</b> from 500 new prospects, identify the <b>top 50</b> most likely to accept a
+personal loan offer. Historical data: 2,000 rows, ~10% response rate — imbalanced, so accuracy is out.</p>
+
+<h4>The ten steps</h4>
+<ol>
+<li>Import the Excel file; <b>drop ID, and drop zip code</b> — it looks numeric but is categorical</li>
+<li>Convert the outcome (personal loan) to a <b>factor</b></li>
+<li>Normalise the features; keep the X matrix and Y vector separately</li>
+<li><b>75/25</b> train-test split</li>
+<li>Fit <b>KNN with 10-fold cross-validation</b>, k = 1…10 → best <b>k = 3</b></li>
+<li>Fit a <b>decision tree</b>; visualise the splits — income, credit card, education, family, city account</li>
+<li>Fit <b>logistic regression</b> with threshold = <b>0.4</b></li>
+<li>Compare all models on <b>F1 and on profit</b></li>
+<li>Score the 500 new prospects, sort descending by predicted probability, take the <b>top 50</b></li>
+<li>Write the ranked target list to CSV</li>
+</ol>
+
+<h4>Model comparison</h4>
+<table class="dt">
+<tr><th>Model</th><th>Result</th><th>Read</th></tr>
+<tr><td>KNN (k=3)</td><td>F1 ≈ <b>72%</b></td><td>Precision high, <b>recall only 59%</b> — missed 19 of 47 true responders</td></tr>
+<tr><td>Decision tree</td><td>Best F1 <b>and</b> best profit</td><td>Won the bake-off on both metrics</td></tr>
+<tr><td>Logistic</td><td>F1 ≈ <b>67.6%</b></td><td>Lower F1 — but see below</td></tr>
+</table>
+
+<div class="callout"><span class="c-label">⭐ The granularity point — the real lesson of this case</span>
+<p>The tree produces only <b>7–8 distinct leaf probabilities</b>, with <b>35 people tied at probability
+1.0</b>. Logistic regression produces <b>499 distinct scores</b>. When the deliverable is a <b>ranked top
+50</b>, ties are fatal — you cannot choose 50 out of 35-tied-at-the-top plus a block below. <b>The model
+with the better F1 was the worse tool for the actual job.</b></p></div>
+
+<h4>Scoring the new data</h4>
+<p>Apply the fitted model to the 500-person sheet, pull the predicted probability of class = 1, sort
+descending, take the top 50. Result: <b>46 of the top 50 above 50% probability, versus ~5 expected hits
+with no model — roughly 9× lift.</b></p>
+
+<div class="callout green"><span class="c-label green">Independent confirmation</span>
+<p><b>Claude Code, run in parallel on the same files, also chose logistic regression</b> — and cited
+the same reason: granularity of the probability scores for ranking. Two independent paths, same call.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">Choosing models, and fixing the data underneath them</div>
+
+      <div class="sc bl-accent" id="selection">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🧭</div>
+            <div>
+              <div class="sc-tag ">09 · Framing</div>
+              <div class="sc-name">The no-supermodel theorem</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p><b>There is no single best model.</b> Different algorithms make different assumptions and attack the
+data differently, so which one wins is an empirical question every single time.</p>
+
+<table class="dt">
+<tr><th>Algorithm</th><th>How it actually works</th></tr>
+<tr><td>Decision tree</td><td>Recursive <b>entropy-minimising splits</b>, column by column</td></tr>
+<tr><td>Logistic</td><td>Fits a <b>sigmoid curve</b> to estimate class probability</td></tr>
+<tr><td>KNN</td><td>Finds the <b>k most similar training rows</b>, takes a majority vote</td></tr>
+</table>
+
+<h4>The standard toolkit — run these, in this order</h4>
+<ol>
+<li>KNN</li>
+<li>Logistic regression</li>
+<li>Decision tree</li>
+<li>Random forest</li>
+<li>Gradient boosted machine (XGBoost)</li>
+<li>Neural network</li>
+</ol>
+
+<div class="callout"><span class="c-label">Tie-breakers, in order</span>
+<p>① If two models are close on your metric, <b>prefer the more explainable one</b>. Logistic
+regression weights can be read aloud to a business stakeholder; random forests and neural nets cannot.
+② If the domain has an expensive error, <b>break the tie on that error</b> (see the cancer case).</p></div>
+
+<div class="callout amber"><span class="c-label amber">The reproducibility warning</span>
+<p><b>Different train/test splits can change which model wins.</b> So a team has to <b>agree on a fixed
+process and stick to it</b> — same seed, same split, same metric — or you are just re-rolling dice and
+calling the winner science.</p></div>
+
+<h4>Choosing the metric</h4>
+<ul>
+<li><b>Imbalanced classes</b> → F1, or precision/recall directly</li>
+<li><b>False negatives expensive</b> (cancer, fraud, churn) → skew to recall</li>
+<li><b>Unsure</b> → F1 is the safe default</li>
+<li><b>You have dollar values</b> → profit/cost matrix, and ignore the rest</li>
+</ul>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="smote">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">⚗️</div>
+            <div>
+              <div class="sc-tag ">10 · Data Prep</div>
+              <div class="sc-name">SMOTE — manufacturing the minority class</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>When the positive class is genuinely rare — <b>4–5%</b> — models stop trying. On the donors dataset
+(<b>~90,569 non-donors vs ~4,800 donors</b>, ~5% positive) plain logistic regression <b>predicted zero
+positives</b>; the confusion matrix was useless.</p>
+
+<div class="callout amber"><span class="c-label amber">⛔ The one rule that must never be broken</span>
+<p><b>You can do anything you like to the training data. The test data must never be touched.</b>
+Rebalance, synthesise, resample, impute — all fine on train. Touch the test set and your evaluation is
+measuring a world that does not exist.</p></div>
+
+<h4>SMOTE — Synthetic Minority Oversampling Technique</h4>
+<ul>
+<li>Generates <b>synthetic minority-class points</b> in the distributional neighbourhood of existing ones</li>
+<li>Goal: rebalance the <b>training</b> set toward 50/50 so the model can actually learn the minority pattern</li>
+<li>Applied <b>only to training data, before fitting</b> — the test set keeps its true 5% distribution</li>
+<li>Workflow: fit on SMOTE-augmented train → <b>evaluate on the original, untouched test set</b></li>
+</ul>
+<p>Visual intuition: the rare class is a sparse scatter of red points; SMOTE fills in nearby synthetic red
+points until the two classes are balanced.</p>
+<p>After SMOTE, <b>re-run the whole standard toolkit</b> and compare against the pre-SMOTE baseline to
+confirm you actually gained something.</p>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="missing">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🕳️</div>
+            <div>
+              <div class="sc-tag ">11 · Data Prep</div>
+              <div class="sc-name">Missing values, done properly</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The donors dataset is the first genuinely <b>messy</b> data in the course.</p>
+<table class="dt">
+<tr><th>Column</th><th>Missing</th></tr>
+<tr><td>Income rating</td><td>~21,000 rows</td></tr>
+<tr><td>Wealth rating</td><td>~44,000 rows</td></tr>
+<tr><td>Is homeowner</td><td><b>43,000 of 90,000</b></td></tr>
+</table>
+<p>Dropping every row with any missing value takes <b>95,000 rows down to ~10,000</b>. Unacceptable —
+and worse, the survivors are almost certainly not a random sample.</p>
+
+<h4>Numeric columns — three tiers</h4>
+<ol>
+<li><b>Basic:</b> fill with the column <b>median</b>. Median over mean — robust to outliers.</li>
+<li><b>Intermediate:</b> <b>group first</b> (e.g. by age + education bucket), then impute that group's median.</li>
+<li><b>Advanced:</b> treat the missing column as its own <b>prediction target</b> — run a full train/test
+pipeline to predict it, fill in the predictions, then use the completed column in the main model.</li>
+</ol>
+
+<h4>Categorical columns</h4>
+<div class="callout"><span class="c-label">Don't use the mode</span>
+<p>Filling every missing state with "California" is too crude. Instead <b>create a new factor level called
+"Unknown"</b>. It preserves every row, and it lets the model learn whether <b>being unknown is itself
+predictive</b> — which it very often is. It also sidesteps the rare-level problem, where a state like
+Rhode Island appears in test but never in training.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">The heavy machinery</div>
+
+      <div class="sc bl-accent" id="nnet">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🧠</div>
+            <div>
+              <div class="sc-tag ">12 · Methods</div>
+              <div class="sc-name">Neural networks and backpropagation</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>Architecture</h4>
+<ul>
+<li><b>Input layer</b> — one node per feature (30 nodes for the cancer data)</li>
+<li><b>Hidden layer(s)</b> — each node takes a <b>weighted sum</b> of its inputs and applies a
+<b>non-linear</b> transformation (sigmoid/logistic)</li>
+<li><b>Output layer</b> — a probability for classification, a number for regression</li>
+<li><b>Weights</b> live on every connection. They are the entire thing the model learns.</li>
+</ul>
+
+<h4>Forward pass</h4>
+<p>For each row: multiply each input by its weight, sum into the hidden node, apply the sigmoid, pass
+forward, repeat to the output. With <b>random initial weights the first predictions are garbage</b> —
+that is expected and it is the starting point.</p>
+
+<h4>Backpropagation — the training loop</h4>
+<ol>
+<li>Compare prediction to the actual label → compute error</li>
+<li>Use <b>partial derivatives</b> to work out which direction each weight should move to reduce that error</li>
+<li>Nudge every weight in that direction (<b>gradient descent</b>)</li>
+<li>Repeat across every row, and iterate — often ~10,000 passes — until the weights converge</li>
+</ol>
+<p>That loop is the core of <b>every</b> neural network, from this one to the large language models.</p>
+
+<h4>Hyperparameters</h4>
+<ul>
+<li><b>Hidden layers and nodes per layer</b> — try several configurations (e.g. 5 vs 7 nodes)</li>
+<li><b>Decay</b> — a regularisation term penalising large weights, to prevent overfitting</li>
+<li><b>Stopping criterion</b> — halt when the error improvement per iteration drops below ~1%</li>
+</ul>
+
+<h4>Cancer result</h4>
+<p>Final: <b>7 hidden nodes, decay = 0.1</b>. Parameter count = (30 × 7) + 7 biases + 7 output weights +
+1 bias = <b>~225 weights</b>. Accuracy <b>96.5%</b>, AUC <b>0.992</b>, and <b>3 false negatives — the
+lowest of any model tested</b>. The visualisation shades each line by weight magnitude; all 210
+input-to-hidden connections exist.</p>
+
+<div class="callout amber"><span class="c-label amber">Trade-offs</span>
+<p><b>Pros:</b> very high accuracy, captures complex non-linear relationships, no distributional assumptions.
+<b>Cons:</b> a black box you cannot explain to a judge or an executive, <b>no built-in variable selection</b>,
+computationally expensive, and it overfits readily without careful validation.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="ensembles">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🌲</div>
+            <div>
+              <div class="sc-tag ">13 · Methods</div>
+              <div class="sc-name">Ensembles — bagging, boosting, stacking</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>Why they work</h4>
+<p>Individual models make <b>different kinds</b> of errors. Combine models that are genuinely diverse and
+the errors partially cancel. Models at ~70% individual accuracy can combine to <b>~83%</b>.</p>
+<p><b>Diversity is the load-bearing condition</b> — different algorithms, different data samples, or
+different feature subsets. Five copies of the same model average to exactly that model.</p>
+<p>The famous case: the <b>Netflix Prize</b>, where no single model won — a combination of four did.</p>
+
+<h4>Majority vote (the simple version)</h4>
+<p>Fit K diverse models on the same training data; for each test row take the majority class. For
+regression, average instead of vote.</p>
+
+<h4>Bagging — bootstrap aggregating (→ Random Forest)</h4>
+<ol>
+<li>Randomly sample rows <b>with replacement</b> (e.g. 500 of 1,000) — bootstrapping</li>
+<li>Randomly sample features (e.g. 10 of 30 columns)</li>
+<li>Fit a decision tree on that bootstrapped subset</li>
+<li>Repeat <b>1,000 times</b></li>
+<li>Final prediction = majority vote of all 1,000 trees</li>
+</ol>
+<p>Sampling <b>with replacement</b> means one row can appear several times in a sample, effectively zooming
+in on regions of the data. Net effect: <b>variance down, bias roughly unchanged.</b></p>
+
+<h4>Boosting (XGBoost)</h4>
+<ol>
+<li>Fit a simple tree — a <b>weak learner</b></li>
+<li>Compute the <b>residuals</b> (what it got wrong)</li>
+<li>Fit a second tree <b>to those residuals</b></li>
+<li>Combine, recompute residuals, fit a third tree to those</li>
+<li>Repeat until performance converges</li>
+</ol>
+<p>Each tree corrects the mistakes of all the trees before it. Hyperparameters: learning rate, max depth,
+number of trees, subsampling ratio — <code>caret</code>'s <code>train()</code> picks sane defaults and
+can tune by cross-validation.</p>
+<p><i>Toy example:</i> hours studied vs pass/fail. Tree 1 predicts 0.5 for everyone. Tree 2 finds the split
+at 2 hours — overestimating above, underestimating below. Adjust by the average residual in each leaf, iterate.</p>
+
+<div class="callout"><span class="c-label">Bagging vs boosting in one line</span>
+<p><b>Bagging builds 1,000 trees in parallel and votes</b> — it attacks variance. <b>Boosting builds trees
+in sequence, each fixing the last</b> — it attacks bias. That is why random forest is hard to overfit and
+XGBoost needs its learning rate watched.</p></div>
+
+<h4>Stacking</h4>
+<p>Train several base models, then feed <b>their predictions as features into a meta-model</b> that learns
+the optimal way to combine them. More sophisticated than a vote; less common in practice.</p>
+
+<div class="callout amber"><span class="c-label amber">Trade-offs</span>
+<p><b>Pros:</b> consistently higher accuracy; random forest in particular is robust to overfitting.
+<b>Cons:</b> black box, hard to explain, higher compute cost, and genuinely hard to debug.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">Predicting numbers, not classes</div>
+
+      <div class="sc bl-accent" id="numeric">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">📏</div>
+            <div>
+              <div class="sc-tag ">14 · Numeric Prediction</div>
+              <div class="sc-name">Numeric prediction — the error metrics</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The outcome is a <b>continuous number</b>, not a class label. Note the vocabulary: in Shmueli and in
+Bapna's usage, <b>"prediction" means a numeric outcome</b> and "classification" means a categorical one.</p>
+
+<h4>Where it shows up (from the class brainstorm)</h4>
+<ul>
+<li>Catalog spend — how much will this customer spend</li>
+<li>Office market rent over time · IT infrastructure and server demand</li>
+<li>Health insurance premium amounts · machine failure timing</li>
+<li>Startup valuation from pitch data · <b>semiconductor vendor cost savings</b></li>
+<li>Four-year graduation rates</li>
+</ul>
+
+<h4>The four error metrics</h4>
+<table class="dt">
+<tr><th>Metric</th><th>Formula</th><th>What it tells you</th></tr>
+<tr><td>ME</td><td>mean(actual − predicted)</td><td><b>Bias direction</b> — are you systematically over or under? <b>Weakness:</b> positives and negatives cancel, so it can read zero on a terrible model.</td></tr>
+<tr><td>MAE</td><td>mean(|actual − predicted|)</td><td>Average error magnitude, in the original units. Forgiving of outliers.</td></tr>
+<tr><td>MAPE</td><td>mean(|actual − predicted| / actual)</td><td>Error <b>relative to scale</b>. Missing by $2,000 on a $13,000 car is far worse than on a $100,000 car.</td></tr>
+<tr><td>RMSE</td><td>sqrt(mean((actual − predicted)²))</td><td><b>The standard.</b> Squaring punishes big misses disproportionately. Reported in the original units.</td></tr>
+</table>
+
+<div class="callout"><span class="c-label">Why RMSE ≠ MAE — the example</span>
+<p>Model 1 misses by exactly 1 on every row → <b>RMSE = 1</b>. Model 2 is perfect except one error of 5 →
+<b>RMSE = 2.23</b>. Same or lower total error, much worse RMSE. <b>Prefer Model 1</b> — and if you would
+rather have the occasional big miss, you should be optimising MAE instead. <b>Pick the metric that matches
+which mistake actually hurts you.</b></p></div>
+
+<h4>Every classifier has a regression twin</h4>
+<table class="dt">
+<tr><th>Model</th><th>What changes</th></tr>
+<tr><td>KNN</td><td>Predict the <b>average Y</b> of the k neighbours instead of a majority vote</td></tr>
+<tr><td>Tree</td><td>Leaf predicts the <b>average Y</b> of its training rows instead of the majority class</td></tr>
+<tr><td>Regression</td><td>Ordinary least squares — minimise the sum of squared residuals</td></tr>
+<tr><td>Neural net</td><td>Same architecture, <b>continuous output node</b></td></tr>
+<tr><td>XGBoost</td><td>Same boosting; the residuals are just numeric errors</td></tr>
+</table>
+<p><b>Vote → average.</b> That is the whole difference.</p>
+
+<h4>Catalog spend results (RMSE, lower is better)</h4>
+<table class="dt">
+<tr><th>Model</th><th>RMSE</th></tr>
+<tr><td>KNN</td><td>148</td></tr>
+<tr><td>Regression tree</td><td>112</td></tr>
+<tr><td>Ridge</td><td>103.6</td></tr>
+<tr><td>Linear regression</td><td>103</td></tr>
+<tr><td>Elastic net (α = 0.8)</td><td>102.77</td></tr>
+<tr><td><b>Lasso</b></td><td><b>102.74 — best</b></td></tr>
+<tr><td>Neural network</td><td>Performed <b>poorly</b></td></tr>
+</table>
+
+<div class="callout green"><span class="c-label green">The lesson</span>
+<p><b>More complex ≠ better.</b> The neural network lost to plain linear regression, and the winner was
+linear regression with a penalty term. Always run the full toolkit — and be genuinely willing to ship
+the simple model when it wins.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="regularization">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🪒</div>
+            <div>
+              <div class="sc-tag ">15 · Numeric Prediction</div>
+              <div class="sc-name">Regularisation — ridge, lasso, elastic net</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>The problem it solves</h4>
+<p>In wide datasets many columns are noise. <b>Ordinary least squares keeps every variable you hand it</b>,
+useful or not — more junk features, more noise, worse out-of-sample prediction. Decision trees do feature
+selection automatically; linear regression does not, unless you make it.</p>
+
+<h4>The core idea</h4>
+<p>Add a <b>penalty term</b> to the objective. A feature now has to <b>pay to stay in the model</b> — its
+predictive value must exceed its cost.</p>
+<p><code>minimise: sum of squared errors + λ × (penalty on the weights)</code></p>
+<p><b>λ (lambda)</b> is a hyperparameter — higher λ, stronger penalty, more features squeezed out. Chosen
+by <b>cross-validation</b>: try ~100 values, keep the one with the lowest validation error.</p>
+
+<h4>The three flavours</h4>
+<table class="dt">
+<tr><th>Flavour</th><th>Penalty</th><th>Behaviour</th></tr>
+<tr><td>Ridge (L2)</td><td>λ × Σ(wᵢ²)</td><td>Shrinks all coefficients toward zero but <b>never exactly to zero</b> — nothing is eliminated. Good when most features are somewhat useful.</td></tr>
+<tr><td>Lasso (L1)</td><td>λ × Σ|wᵢ|</td><td><b>Can zero coefficients out entirely</b> → automatic feature elimination. The default when you suspect junk.</td></tr>
+<tr><td>Elastic net</td><td>λ × [α·L1 + (1−α)·L2]</td><td>Hybrid. α = 0 is pure ridge, α = 1 is pure lasso. Try several α, keep the lowest validation RMSE.</td></tr>
+</table>
+
+<p>In the catalog case <b>lasso automatically dropped Source_D, Source_P</b> and other junk catalog
+columns, and won at <b>RMSE 102.74</b>. Elastic net at α = 0.8 came in at 102.77 — effectively tied.</p>
+
+<div class="callout"><span class="c-label">Practical guidance</span>
+<p><b>Always run lasso alongside standard regression.</b> The extra work is a few lines and the benefit is
+real. Ridge when you believe most features matter; lasso when you suspect many don't and want the pruning
+done for you. And <b>any time you run logistic regression, also run logistic with lasso.</b></p></div>
+
+<div class="callout green"><span class="c-label green">The unifying idea</span>
+<p>Trees get feature selection for free by construction. Regularisation is how you <b>buy the same
+property for a linear model</b> — and it is why the penalised linear models beat both the tree and the
+neural net on catalog spend.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">Beyond the standard table</div>
+
+      <div class="sc bl-accent" id="matrixfact">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🔗</div>
+            <div>
+              <div class="sc-tag ">16 · Personalization</div>
+              <div class="sc-name">Matrix factorisation — recommendations without features</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>The problem</h4>
+<p>Standard regression predicts the <b>average</b> user's behaviour. Personalisation needs individual-level
+predictions: what will <b>this specific person</b> like? Netflix, Amazon, Spotify, OkCupid, LinkedIn.</p>
+
+<h4>The data structure — three columns, that's all</h4>
+<p><b>Entity A</b> (user/sender) | <b>Entity B</b> (item/receiver) | <b>engagement score</b> (rating, time, clicks)</p>
+<p>Bitcoin OTC example: sender ID | receiver ID | trust score (−10 to +10). The matrix is
+<b>extremely sparse</b> — 6,000 senders × 6,500 receivers = <b>39 million possible pairs, only ~35,000
+observed</b>. That is under <b>0.1% filled</b>.</p>
+
+<div class="callout"><span class="c-label">What makes this different</span>
+<p><b>There are no features about anyone.</b> No demographics, no genre tags, no product attributes —
+only the interaction history. The method extracts structure from <i>who interacted with whom</i>, nothing else.</p></div>
+
+<h4>Latent factors — the intuition</h4>
+<ul>
+<li>Assume <b>K imaginary dimensions</b> that both users and items have weights on</li>
+<li>For movies these might loosely resemble genre, pacing, star power — but they are <b>never named</b>
+and the algorithm does not know what they mean</li>
+<li>Each user gets a vector of K weights; each item gets a vector of K weights</li>
+<li><code>Predicted rating = dot product = u₁·i₁ + u₂·i₂ + u₃·i₃</code></li>
+</ul>
+
+<h4>Training</h4>
+<ol>
+<li>Split the <b>observed interactions</b> 75/25</li>
+<li>Find the user and item weights that minimise prediction error on training</li>
+<li><b>K is a hyperparameter</b> — try K = 1, 2, 3… and select on validation RMSE</li>
+<li>Iterate until the weights converge — same spirit as neural network training</li>
+</ol>
+
+<h4>Results</h4>
+<p>Sender 1 × Receiver 15: predicted <b>0.57</b>, actual <b>1</b> — rounds correctly. Sender 2 × Receiver 20:
+predicted <b>6.1</b>, actual <b>5</b>. Test RMSE <b>2.84</b> on a −10 to +10 scale — strong.</p>
+
+<h4>Where else it applies (class brainstorm)</h4>
+<table class="dt">
+<tr><th>Domain</th><th>A | B | score</th></tr>
+<tr><td>LinkedIn</td><td>person | person | messages exchanged → recommend connections</td></tr>
+<tr><td>Job matching</td><td>candidate | job | tenure achieved → recommend jobs</td></tr>
+<tr><td>Healthcare</td><td>patient | clinic or nurse type | visit frequency → recommend care pathways</td></tr>
+<tr><td>Real estate</td><td>investor | property type | historical return → recommend targets</td></tr>
+<tr><td><b>Vendor selection</b></td><td>company | vendor | <b>cost savings achieved</b> → recommend vendors</td></tr>
+</table>
+
+<div class="callout green"><span class="c-label green">The constraint — and the one to remember</span>
+<p><b>Both of the first two columns must be entities with IDs, and the third must be a numeric engagement
+proxy.</b> If you have that shape, you can build a recommender with zero features about either side.
+The vendor row above is the one worth keeping in your back pocket.</p></div>
+
+</div></div>
+      </div>
+      <div class="sc bl-accent" id="textanalytics">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">📝</div>
+            <div>
+              <div class="sc-tag ">17 · Text</div>
+              <div class="sc-name">Text analytics and the fake review problem</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>The challenge</h4>
+<p>Unstructured text cannot be fed to a model — it has to become numbers. A corpus of 1,600 reviews at
+~50 words each yields <b>thousands of candidate features</b>, and adding bigrams ("customer service")
+expands it further.</p>
+
+<h4>Pre-processing pipeline</h4>
+<ol>
+<li><b>Remove stop words</b> — "a", "the", "but", "from" carry no signal</li>
+<li><b>Lowercase everything</b> — "Customer" and "customer" must be one feature</li>
+<li><b>Stemming</b> — fishing/fishes/fish → <code>fish</code>; conditional/conditionally → <code>condit</code></li>
+<li><b>Drop very high-frequency words</b> — in nearly every document, so not discriminating</li>
+<li><b>Drop very low-frequency words</b> — in one or two documents, too sparse to learn from</li>
+</ol>
+
+<h4>Text → numbers</h4>
+<table class="dt">
+<tr><th>Encoding</th><th>Value in each cell</th></tr>
+<tr><td>Bag of words</td><td><b>1 / 0</b> — is the word present. Simplest; ignores frequency and context.</td></tr>
+<tr><td>Term frequency</td><td><b>Count</b> of appearances in that document.</td></tr>
+<tr><td><b>TF-IDF</b></td><td><code>TF × log(N / df)</code> — penalises words appearing in almost every document. <b>The standard choice.</b></td></tr>
+</table>
+
+<h4>The fake review dataset</h4>
+<ul>
+<li><b>1,600 Chicago hotel reviews</b>: 800 genuine (validated by the hotels) + 800 deceptive
+(written by paid Amazon Mechanical Turk workers)</li>
+<li>Split 1,200 train / 400 test</li>
+<li><b>Human benchmark: 61.9%</b> — the best a person managed on the test set</li>
+</ul>
+
+<table class="dt">
+<tr><th>Model</th><th>Accuracy</th><th>Note</th></tr>
+<tr><td>Decision tree on TF-IDF</td><td>~<b>70%</b></td><td>Beats the human baseline. Key splits: "towards chicago", "look"</td></tr>
+<tr><td>Random forest on TF-IDF</td><td>~<b>83%</b></td><td>Plus a ranked <b>feature importance</b> list of the most discriminating words</td></tr>
+</table>
+
+<div class="callout"><span class="c-label">The headline</span>
+<p><b>A bag of words and an off-the-shelf model beat humans by 20 points</b> at spotting fabricated
+reviews. No semantics, no understanding — just which words co-occur. Worth remembering before assuming a
+task needs a language model.</p></div>
+
+<div class="callout green"><span class="c-label green">Explainability from an ensemble</span>
+<p>Random forest tracks which words drove the most splits across all 1,000 trees and outputs ranked
+importance scores — so you get <b>some</b> explainability even out of a black box.</p></div>
+
+<h4>Where labels come from</h4>
+<ul>
+<li><b>Users label implicitly</b> — the spam button, star ratings, watch time</li>
+<li><b>Domain experts</b> label a sample; the model generalises to the rest</li>
+<li><b>Crowdsourcing</b> (Mechanical Turk) for scale</li>
+</ul>
+<p>Once labels exist, the entire classification playbook applies unchanged: split, fit the toolkit,
+compare on F1.</p>
+
+<h4>Common applications</h4>
+<p>Spam detection (<b>Gmail's filter was Google's first ML application</b>) · sentiment analysis ·
+fake review and misinformation detection · document categorisation · <b>contract and RFP analysis</b>
+(comparing statement-of-work language over time) · real estate risk reports from PDF appraisals ·
+earnings-call tone analysis.</p>
+
+<div class="callout amber"><span class="c-label amber">Guest speaker — Amazon Advertising</span>
+<p>NYU MSBA alum, class of 2015 (second cohort), now running strategy for large advertisers — Apple,
+Samsung — on Amazon's ad platform. Confirmed the ML and text foundations in this course are directly
+applied in industry; <b>sponsored ad placement vs organic ranking</b> is a core predictive-modelling use case.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">Tooling</div>
+
+      <div class="sc bl-accent" id="tooling">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico ">🤖</div>
+            <div>
+              <div class="sc-tag ">18 · Tooling</div>
+              <div class="sc-name">R vs. the agents — why you still learn the code</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>The question Bapna answered head-on</h4>
+<p>Agents — Claude Code, Mentorika, ChatGPT — can generate and execute an entire modelling pipeline from
+one prompt. So why learn the steps?</p>
+
+<div class="callout amber"><span class="c-label amber">The answer, verbatim in spirit</span>
+<p>Agents make <b>"spectacular mistakes that look correct."</b> Without knowing the micro-steps you
+<b>cannot catch them</b>. Knowing the pipeline is what lets you evaluate any agent's output rigorously.
+Recommended workflow: <b>use the agent to move fast, then validate against your own understanding.</b></p></div>
+
+<h4>The Claude Code demo (Universal Bank)</h4>
+<ol>
+<li>Case PDF + Excel file dropped into a folder; folder set as the working directory</li>
+<li>Prompt: <i>"examine the two files and tell me what they are about"</i> → it read both sheets</li>
+<li>Follow-up: <i>"build predictive models and score the target list to find the top 50 people to invite"</i></li>
+<li>It chose <b>logistic regression</b>, citing <b>granularity of the probability scores</b> — the same
+reason the R analysis landed there</li>
+<li>Produced a ranked list of all 500 prospects, conceptually matching the R output</li>
+</ol>
+<p><b>Stated limitation:</b> the chat products execute Python, not R — they generate R code for you to
+run locally.</p>
+
+<div class="callout green"><span class="c-label green">⭐ Worth knowing for the post-module build</span>
+<p>That limitation is true of the <b>chat</b> products. <b>Claude Code runs on your machine with shell
+access</b>, so it can call <code>Rscript</code> directly on your files — write the R, run it, read the
+RMSE, and iterate without you copy-pasting between windows. Since R and RStudio are already installed,
+this is available to you for the 25% model-build assignment.</p></div>
+
+<h4>Mentorika</h4>
+<ul>
+<li>Built on OpenAI; Python code interpreter plus an agentic structure</li>
+<li><b>Tutor version in development</b> — deliberately adds friction: instead of answering, it asks
+<i>"can you explain why you want to do this?"</i> first, to force reasoning before action</li>
+<li><b>MCP (Model Context Protocol) integration planned</b> — will allow R and other non-Python libraries</li>
+<li>Association rule mining (the BigBasket case) currently <b>cannot run</b> in Mentorika — the Python
+library isn't supported</li>
+</ul>
+
+<h4>Cross-validation across tools</h4>
+<p>Suggested practice: run the analysis in one agent, then <b>audit it with a second</b>. Visual Studio
+Code with multiple LLM integrations makes this easy. If two independent agents agree, confidence goes up —
+but <b>agreement is not correctness</b>, and neither is a substitute for understanding the pipeline.</p>
+
+<h4>Observed agent failure modes — the list from class</h4>
+<div class="anom-list">
+<div class="anom"><span class="anom-b bad">Over-builds</span><div class="anom-text">Applied <strong>PCA to a basic k-means exercise</strong> that did not need it.</div></div>
+<div class="anom"><span class="anom-b bad">Invents</span><div class="anom-text">Creates <strong>new features without being asked</strong>.</div></div>
+<div class="anom"><span class="anom-b bad">Over-corrects</span><div class="anom-text">Adjusts time frames <strong>so aggressively all the data becomes unusable</strong>.</div></div>
+<div class="anom"><span class="anom-b bad">Over-reacts</span><div class="anom-text">Claude is <strong>sensitive to negative feedback</strong> — ask it to change one variable and it may rewrite the entire pipeline.</div></div>
+<div class="anom"><span class="anom-b ok">Ground truth</span><div class="anom-text">The engineering team behind Mentorika (20,000+ lines of production code) reports the underlying LLMs make <strong>spectacular mistakes daily</strong>.</div></div>
+</div>
+
+<div class="callout"><span class="c-label">How to actually work with this</span>
+<p><b>Constrain the change.</b> "Change only the k value, leave everything else identical" prevents the
+rewrite-everything failure. And <b>always diff the output</b> against the previous run — the dangerous
+failures are the ones that still produce a plausible-looking number.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">Reference</div>
+
+      <div class="sc bl-accent" id="hooks2">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">⭐</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Day 2 exam hooks — the fifteen things worth memorising</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<ol>
+<li><b>Accuracy lies under imbalance.</b> 94/6 churn → predict-nothing scores 94%. Under ~20% minority, go straight to precision/recall.</li>
+<li><b>Precision = TP/(TP+FP)</b> — lines up with <b>P</b>redictions. <b>Recall = TP/(TP+FN)</b> — lines up with <b>R</b>eality.</li>
+<li><b>F1 = 2PR/(P+R) = 2TP/(2TP+FP+FN).</b> Harmonic mean, skews to the lower one. <b>TN never appears</b> — that's why it survives imbalance.</li>
+<li><b>Cancer / fraud / churn → optimise recall.</b> The false negative is the expensive error.</li>
+<li><b>0.5 is not special.</b> Every cutoff gives a different confusion matrix from the <i>same</i> model. Sweep them.</li>
+<li><b>ROC</b> = TPR vs FPR across all cutoffs; each point is one cutoff; better models bow to the <b>top-left</b>.</li>
+<li><b>AUC bands:</b> &lt;0.7 useless · 0.7–0.8 acceptable · 0.8–0.9 good · &gt;0.9 excellent. AUC is threshold-free; precision/recall are not.</li>
+<li><b>Lift = model response rate ÷ baseline.</b> Poor global accuracy can still mean excellent top-decile lift — check lift at your target N.</li>
+<li><b>Profit matrix beats every proxy metric</b> when you have dollars. It also sets your threshold for you.</li>
+<li><b>No supermodel theorem.</b> Run the toolkit in order: KNN → logistic → tree → random forest → XGBoost → neural net. Ties go to the explainable model.</li>
+<li><b>⛔ SMOTE the training data only. Never touch the test set.</b> Rebalance train toward 50/50, evaluate on the true distribution.</li>
+<li><b>Missing values:</b> numeric → median (not mean), better: group median, best: predict it. Categorical → a new <b>"Unknown"</b> level, never the mode.</li>
+<li><b>Bagging = parallel trees + vote (kills variance). Boosting = sequential trees on residuals (kills bias).</b> Ensembles need <b>diversity</b> or they do nothing.</li>
+<li><b>RMSE</b> punishes big misses (squared); <b>MAE</b> doesn't; <b>MAPE</b> scales by magnitude; <b>ME</b> only shows bias direction and cancels out.</li>
+<li><b>Lasso (L1) zeroes coefficients out; ridge (L2) only shrinks them.</b> Lasso won catalog spend at RMSE 102.74 — beating the neural net. <b>Complex ≠ better.</b></li>
+</ol>
+
+<div class="callout green"><span class="c-label green">The one-line summary of Day 2</span>
+<p><b>The metric is the decision.</b> Every choice today — accuracy vs F1, threshold, ROC vs lift, profit
+matrix — was really the same question: <i>what does being wrong cost, and in which direction?</i>
+Answer that and the model selection follows.</p></div>
+
 </div></div>
       </div>
     </div>
