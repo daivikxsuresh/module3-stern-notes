@@ -1,30 +1,1098 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Data Driven Decision Making · Module 3 · NYU Stern MSBAi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Lora&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:#0d0a0c;color:#f2ede6;font-family:'Lora',Georgia,serif;min-height:100vh;
-display:flex;align-items:center;justify-content:center;padding:32px;text-align:center}
-.box{max-width:460px}
-.badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
-text-transform:uppercase;color:#fbbf24;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);
-border-radius:5px;padding:4px 10px;margin-bottom:20px}
-h1{font-family:'DM Serif Display',serif;font-size:36px;line-height:1.15;margin-bottom:12px}
-h1 span{color:#fbbf24}
-p{color:#a97f8c;font-size:15.5px;line-height:1.7;margin-bottom:8px}
-.when{font-family:'JetBrains Mono',monospace;font-size:12px;color:#fbbf24;margin:22px 0 30px}
-a{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;
-color:#a97f8c;text-decoration:none;border:1px solid #2e1a21;border-radius:7px;padding:10px 18px;
-transition:color .15s,border-color .15s}
-a:hover{color:#f2ede6;border-color:#fbbf24}
-</style></head><body>
-<div class="box">
-  <div class="badge">DDD · Module 3</div>
-  <h1>Data Driven <span>Decision Making</span></h1>
-  <p>Prof. Rob Seamans · causal inference, instrumental variables</p>
-  <p>Notes go up the evening of each session, same format as the Machine Learning page.</p>
-  <div class="when">Thu–Fri · Aug 20–21</div>
-  <a href="../">← Module 3 hub</a>
-</div></body></html>
+:root {
+  --bg:      #0d0b06;
+  --surface: #16130c;
+  --card:    #1b1710;
+  --border:  #2e2616;
+  --accent:  #fbbf24;
+  --accent-soft: rgba(251,191,36,.08);
+  --sky:     #38bdf8;
+  --green:   #34d399;
+  --red:     #f87171;
+  --text:    #f2ede6;
+  --muted:   #a9977f;
+  --faint:   #40371f;
+  --sidebar-w: 256px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Lora', Georgia, serif;
+  font-size: 16px; line-height: 1.75;
+  display: flex; min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(251,191,36,.04) 1px, transparent 1px);
+  background-size: 28px 28px; pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 400px;
+  background: radial-gradient(ellipse, rgba(251,191,36,.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── GATE ── */
+#gate { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.gate-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 44px; max-width: 360px; width: 90%; text-align: center; }
+.gate-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+.gate-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); margin-bottom: 24px; }
+.gate-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: .08em; outline: none; text-align: center; transition: border-color .2s; }
+.gate-input:focus { border-color: var(--accent); }
+.gate-btn { margin-top: 12px; width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: #0d0b06; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; transition: opacity .2s; }
+.gate-btn:hover { opacity: .85; }
+.gate-err { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--red); margin-top: 10px; min-height: 16px; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: rgba(13,11,6,.97); border-right: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 100; padding: 24px 0 40px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.sb-brand { padding: 0 18px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.sb-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(251,191,36,.25); border-radius: 4px; padding: 3px 8px; margin-bottom: 8px; }
+.sb-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); line-height: 1.3; }
+.sb-sub { font-size: 12px; color: var(--muted); margin-top: 3px; font-style: italic; }
+.sb-group { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); padding: 14px 18px 5px; }
+.sb-nav a { display: flex; align-items: center; gap: 9px; padding: 7px 18px; text-decoration: none; font-size: 13px; color: var(--muted); transition: color .15s, background .15s; border-left: 2px solid transparent; }
+.sb-nav a:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.sb-nav a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+.sb-nav .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--faint); flex-shrink: 0; transition: background .15s; }
+.sb-nav a.active .dot { background: var(--accent); }
+.sb-back-row { border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.sb-back-row a { display: flex; align-items: center; gap: 8px; padding: 12px 18px; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .05em; color: var(--muted); transition: color .15s, background .15s; }
+.sb-back-row a:hover { color: var(--text); background: rgba(255,255,255,.03); }
+
+/* ── MAIN ── */
+#main { margin-left: var(--sidebar-w); flex: 1; position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+#hdr { padding: 48px 56px 32px; border-bottom: 1px solid var(--border); }
+.hdr-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.hdr-title { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--text); line-height: 1.15; margin-bottom: 6px; }
+.hdr-title span { color: var(--accent); }
+.hdr-sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; font-style: italic; }
+.day-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.day-tab { padding: 8px 20px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .07em; cursor: pointer; border: 1px solid var(--border); color: var(--muted); background: transparent; transition: all .2s; }
+.day-tab:hover { color: var(--text); border-color: var(--accent); }
+.day-tab.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+/* ── CONTENT ── */
+#content { padding: 36px 56px 80px; }
+.day-panel { display: none; }
+.day-panel.active { display: block; }
+
+/* ── SECTION CARD ── */
+.sc {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 16px; overflow: hidden;
+  transition: box-shadow .2s, transform .18s;
+  animation: fadeUp .45s cubic-bezier(.16,1,.3,1) both;
+}
+.sc:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+.sc.bl-accent { border-left: 3px solid var(--accent); }
+.sc.bl-sky    { border-left: 3px solid var(--sky); }
+.sc.bl-green  { border-left: 3px solid var(--green); }
+
+.sc-hdr { padding: 20px 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; user-select: none; transition: background .15s; }
+.sc-hdr:hover { background: rgba(255,255,255,.02); }
+.sc-hdr-l { display: flex; align-items: center; gap: 14px; }
+.sc-ico { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; background: var(--accent-soft); border: 1px solid rgba(251,191,36,.2); }
+.sc-ico.sky { background: rgba(56,189,248,.1); border-color: rgba(56,189,248,.2); }
+.sc-ico.green { background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.2); }
+.sc-tag { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+.sc-tag.sky { color: var(--sky); }
+.sc-tag.green { color: var(--green); }
+.sc-name { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); line-height: 1.25; }
+.chevron { color: var(--muted); transition: transform .25s; font-size: 14px; flex-shrink: 0; opacity: .7; }
+.sc.open .chevron { transform: rotate(180deg); }
+
+.sc-body { max-height: 0; overflow: hidden; transition: max-height .4s ease, opacity .3s ease; opacity: 0; }
+.sc.open .sc-body { max-height: 4000px; opacity: 1; }
+.sc-in { padding: 4px 28px 28px 80px; border-top: 1px solid var(--border); }
+
+/* ── PROSE ── */
+.sc-in p { margin-bottom: 14px; color: rgba(242,237,230,.88); }
+.sc-in p:last-child { margin-bottom: 0; }
+.sc-in strong, .sc-in b { color: var(--text); font-weight: 600; }
+.sc-in em { color: var(--accent); font-style: italic; }
+.sc-in ul { padding-left: 20px; margin-bottom: 14px; color: rgba(242,237,230,.85); }
+.sc-in li { margin-bottom: 7px; }
+.sc-in li::marker { color: var(--accent); }
+.sc-in ol { list-style: none; padding-left: 0; margin-bottom: 14px; counter-reset: step; }
+.sc-in ol li { counter-increment: step; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; color: rgba(242,237,230,.85); }
+.sc-in ol li::before { content: counter(step); flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); border: 1px solid rgba(251,191,36,.2); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 3px; }
+.sc-in h4 { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); margin: 22px 0 9px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+
+/* ── CALLOUT ── */
+.callout { background: var(--accent-soft); border: 1px solid rgba(251,191,36,.2); border-radius: 9px; padding: 15px 18px; margin: 16px 0; }
+.callout.sky { background: rgba(56,189,248,.08); border-color: rgba(56,189,248,.22); }
+.callout.green { background: rgba(52,211,153,.07); border-color: rgba(52,211,153,.22); }
+.c-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 7px; }
+.callout.sky .c-label { color: var(--sky); }
+.callout.green .c-label { color: var(--green); }
+.callout p { color: rgba(242,237,230,.88); margin: 0; font-size: 14.5px; line-height: 1.65; }
+
+/* ── ANOMALY LIST (good/bad badges) ── */
+.anom-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.anom { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.anom-b { flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; border-radius: 5px; padding: 3px 8px; margin-top: 2px; white-space: nowrap; }
+.anom-b.bad { color: var(--red); background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); }
+.anom-b.ok  { color: var(--green); background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.2); }
+.anom-text { font-size: 14.5px; color: rgba(242,237,230,.82); line-height: 1.65; }
+.anom-text strong { color: var(--text); }
+
+/* ── TABLE ── */
+.dt { width: 100%; border-collapse: collapse; font-size: 14px; margin: 14px 0; }
+.dt th { background: var(--accent-soft); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.dt td { padding: 10px 14px; border-bottom: 1px solid rgba(46,38,22,.7); color: rgba(242,237,230,.82); vertical-align: top; line-height: 1.55; }
+.dt td:first-child { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap; }
+.dt td strong { color: var(--text); }
+.dt tr:last-child td { border-bottom: 0; }
+.dt tr:hover td { background: rgba(251,191,36,.03); }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: rgba(251,191,36,.09); color: var(--accent); border-radius: 4px; padding: 1px 6px; }
+
+/* ── ASSIGNMENTS ── */
+.assign-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 12px; display: flex; gap: 18px; align-items: flex-start; }
+.ac-ico { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); border: 1px solid rgba(251,191,36,.2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.ac-b { flex: 1; }
+.ac-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.ac-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); margin-bottom: 4px; }
+.ac-desc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+.ac-due { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 8px; }
+.ac-due span { color: var(--accent); }
+.done-badge { display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; background: rgba(52,211,153,.1); color: #34d399; border: 1px solid rgba(52,211,153,.2); border-radius: 20px; padding: 2px 8px; margin-left: 8px; }
+
+.divider { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); margin: 32px 0 14px; padding-left: 2px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-label">Data Driven Decision Making · Module 3</div>
+    <div class="gate-title">Daivik's Notes</div>
+    <input id="gate-input" class="gate-input" type="password" placeholder="password" autocomplete="off" />
+    <button class="gate-btn" onclick="tryUnlock()">Enter</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<nav id="sidebar" style="display:none">
+  <div class="sb-back-row"><a href="../">← Module 3 hub</a></div>
+  <div class="sb-brand">
+    <div class="sb-badge">DDD · Module 3</div>
+    <div class="sb-title">Data Driven Decision Making</div>
+    <div class="sb-sub">Prof. Rob Seamans</div>
+  </div>
+  <div class="sb-group">Day 4 — Thu Aug 20</div>
+  <div class="sb-nav">
+    <a href="#orientation"><span class="dot"></span>Orientation</a>
+    <a href="#networking"><span class="dot"></span>Why In Person</a>
+    <a href="#ideal"><span class="dot"></span>The Experimental Ideal</a>
+    <a href="#classsize"><span class="dot"></span>Class Size &amp; OLS Controls</a>
+    <a href="#kitchensink"><span class="dot"></span>The Kitchen-Sink Problem</a>
+    <a href="#star-design"><span class="dot"></span>Project STAR — Design</a>
+    <a href="#star-results"><span class="dot"></span>Project STAR — Results</a>
+    <a href="#star-threats"><span class="dot"></span>Project STAR — Threats</a>
+    <a href="#pred-vs-causal"><span class="dot"></span>Prediction vs. Causal</a>
+    <a href="#psm"><span class="dot"></span>Propensity Score Matching</a>
+    <a href="#psm-cases"><span class="dot"></span>PSM — Three Cases</a>
+    <a href="#psm-warning"><span class="dot"></span>PSM — The Replication</a>
+    <a href="#heckman"><span class="dot"></span>Heckman Selection</a>
+    <a href="#iv"><span class="dot"></span>Instrumental Variables</a>
+    <a href="#iv-cases"><span class="dot"></span>The IV Zoo</a>
+  </div>
+  <div class="sb-group">Reference</div>
+  <div class="sb-nav">
+    <a href="#hooks"><span class="dot"></span>Exam Hooks — Day 4</a>
+  </div>
+</nav>
+
+<div id="main" style="display:none">
+  <div id="hdr">
+    <div class="hdr-eyebrow">NYU Stern · MSBAi · Module 3 · Data Driven Decision Making</div>
+    <h1 class="hdr-title">Data Driven <span>Decision Making</span></h1>
+    <p class="hdr-sub">Prof. Rob Seamans · counterfactuals · Project STAR · propensity score matching · Heckman selection · instrumental variables</p>
+    <div class="day-tabs">
+      <button class="day-tab active" data-panel="day4">Day 4 — Thu Aug 20</button>
+      <button class="day-tab" data-panel="assignments">Assignments</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="panel-day4" class="day-panel active">
+
+      <div class="divider">Logistics — how the two days run</div>
+
+      <div class="sc bl-accent open" id="orientation">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧭</div>
+            <div>
+              <div class="sc-tag">01 · Orientation</div>
+              <div class="sc-name">Who's teaching this, and how it runs</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>Rob Seamans</b> runs DDD as a two-day compressed in-person course. The whole arc is one question asked
+five different ways: <i>where does a credible counterfactual come from when you cannot run the experiment?</i></p>
+
+<h4>Today — Thu Aug 20</h4>
+<ul>
+<li>Instrumental variables</li>
+<li>Propensity score matching</li>
+<li>Selection models (Heckman)</li>
+<li>Fixed effects, <i>if time allows</i></li>
+<li><b>In-class exercise</b> — runs to <b>5pm</b></li>
+</ul>
+
+<h4>Tomorrow — Fri Aug 21</h4>
+<ul>
+<li>Fixed effects, if they didn't get covered today</li>
+<li>Debrief of today's in-class exercise</li>
+<li><b>Alumni speaker · Kathleen Hayes, 10–10:30am</b> — graduated roughly three years ago, out of the professor's own capstone group. <i>(Where she works now came through garbled in the recording — don't quote an employer.)</i></li>
+<li>Natural experiments and difference-in-differences</li>
+<li>Regression discontinuity, randomized field experiments, LLMs</li>
+<li>Wrap-up, plus extra topics if there's room</li>
+</ul>
+
+<h4>The in-class exercise</h4>
+<ul>
+<li>Capstone groups leave the main room for <b>reserved breakout rooms</b></li>
+<li><b>At least one laptop with Stata per group</b> — non-negotiable</li>
+<li>Technical setup (Stata working directory, downloading the data) — <b>Sanchez helps during the break</b></li>
+<li>The <b>Stata do-file is in Brightspace</b>, MSBA 2026 folder. The professor saves an <b>annotated version at the end of the day</b> — grab that one too</li>
+</ul>
+
+<div class="callout"><span class="c-label">Deadline that matters</span>
+<p>The <b>group project posts to Brightspace by end of day tomorrow</b> (Fri Aug 21). That's the 40% post-module
+deliverable — the brief lands before the weekend.</p></div>
+
+<h4>Grading</h4>
+<ul>
+<li><b>Pre-module</b> — an individual assignment plus a <b>group instrumental-variable assignment</b>. He reviewed several group submissions in class and praised the quality genuinely, so they're in and read</li>
+<li><b>In class</b> — individual participation, to the best of each student's ability. <b>Attendance and engagement are the criteria</b>, not brilliance</li>
+<li><b>Post-module</b> — the group project</li>
+</ul>
+
+<h4>The two-way contract</h4>
+<p>He laid out what he owes the room: come prepared to lead discussion; teach analytical and technical skills
+that stay useful even when the specific context changes; and help students become <b>better thinkers about
+using data for business strategy</b> even if they never run one of these techniques again. What he asks back:
+come prepared, participate, respect classmates, arrive on time, abide by the Stern honor code.</p>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="networking">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🤝</div>
+            <div>
+              <div class="sc-tag">02 · Aside</div>
+              <div class="sc-name">Why he thinks the in-person format is the point</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>His view: one of the biggest benefits of an in-person program like this one is meeting, knowing and
+interacting with smart and interesting people. These classmates keep interacting <b>over the coming decades</b>
+— that's what an alumni network actually is.</p>
+<p>He was careful to flag that he <b>cannot prove this causally</b> — which, on a day about causal inference, is
+a deliberate joke and a deliberate point. He believes it strongly anyway, and thinks it matters more here
+because the format compresses everything into two days.</p>
+</div></div>
+      </div>
+
+      <div class="divider">The experimental ideal — and why observational data breaks it</div>
+
+      <div class="sc bl-accent" id="ideal">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎯</div>
+            <div>
+              <div class="sc-tag">03 · Foundations</div>
+              <div class="sc-name">Pasteur's sheep, and the counterfactual you never get to see</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Before any of the observational techniques, establish what a <b>perfect randomized experiment</b> looks like.
+Everything else today is an attempt to approximate this when you can't have it.</p>
+
+<h4>Louis Pasteur, 1882</h4>
+<ul>
+<li>50 sheep, <b>randomly assigned</b> into two pens of 25</li>
+<li>Treated group vaccinated; control group not</li>
+<li><b>All 50</b> then given a lethal dose of anthrax</li>
+<li>Every unvaccinated sheep died. Every vaccinated sheep survived</li>
+</ul>
+<p>Clean randomization made the causal inference <b>unambiguous</b>. No controls, no diagnostics, no argument
+required — the design did the work.</p>
+
+<div class="callout"><span class="c-label">Why humans break it</span>
+<p>Ethical and practical constraints kill the same approach. You cannot randomly assign people to receive
+anthrax, to smoke during pregnancy, or to be <b>denied hospital care</b>. The design you'd want is the design
+you're not allowed to run.</p></div>
+
+<h4>The counterfactual problem</h4>
+<p>For any individual we only ever observe <b>one potential outcome</b>. The person who went to the hospital and
+stayed sick — we never see what would have happened had they stayed home. The person who stayed home and
+recovered — we never see the version who went. <b>Every technique today exists to construct a credible
+counterfactual for the outcome you didn't get to observe.</b></p>
+
+<h4>The hospital / COVID example</h4>
+<ul>
+<li><b>What the observational data shows:</b> hospitalized patients stayed sick; non-hospitalized patients recovered</li>
+<li><b>The naive conclusion:</b> hospitals are harmful</li>
+<li><b>The actual issue:</b> sicker patients <b>self-select into</b> the hospital. The two groups were never comparable to begin with</li>
+<li><b>What randomization would fix:</b> it makes the groups statistically equivalent <i>before</i> treatment, so the post-treatment difference is the treatment</li>
+</ul>
+
+<h4>The twin analogy</h4>
+<p>If one twin gets the treatment and the other does not, the untreated twin is the <b>perfect counterfactual</b>
+— same genes, same upbringing, same everything except the treatment. Randomization is how you approximate
+that at scale: it makes treated and control groups statistically identical <i>on average</i>.</p>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="classsize">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🏫</div>
+            <div>
+              <div class="sc-tag">04 · Foundations</div>
+              <div class="sc-name">Class size, education and earnings — what OLS with controls can and can't do</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>The question:</b> do smaller class sizes increase student performance?</p>
+
+<h4>The ideal experiment the room designed</h4>
+<ul>
+<li>Random assignment to small / medium / large classes</li>
+<li>Baseline testing before treatment</li>
+<li>Same resources at home; teacher quality controlled for</li>
+<li>Multi-year follow-up, across multiple subject types</li>
+</ul>
+<p><b>Why it doesn't happen:</b> humans have agency — parents can simply refuse the assignment. It's expensive
+to scale. And there are ethical objections to deliberately putting some children in worse conditions.</p>
+
+<h4>So what goes wrong with the observational data</h4>
+<p>If students in smaller classes perform better, that could reflect <b>wealth</b>, <b>parental education</b>,
+<b>school quality</b>, or <b>after-school resources</b> — not class size at all. Wealthy families cluster in
+districts that happen to have smaller classes <i>and</i> more educational investment of every other kind.</p>
+<div class="callout"><span class="c-label">The line to keep straight</span>
+<p>Strong correlation does not imply causation — <b>but a causal relationship could still be there</b>. The
+correlation isn't evidence for causality; it also isn't evidence against it. That's the whole reason the
+rest of the day exists.</p></div>
+
+<h4>Education and earnings — the pre-work dataset</h4>
+<ul>
+<li>Positive but <b>noisy</b> correlation between years of schooling and earnings</li>
+<li><b>Curvilinear pattern:</b> some individuals with 10 years of schooling out-earn people with 16–17 years</li>
+<li>Possible explanations raised: degree type, school prestige, or <b>career choice</b> — someone with many years of schooling may deliberately enter a lower-paying field</li>
+</ul>
+
+<h4>OLS with controls</h4>
+<p>Regressing earnings on education with <b>age, age², Black, Hispanic and married</b> as controls still leaves a
+<b>positive, statistically significant coefficient on education</b>. Running it again on the <b>PSID</b> as a
+second data source gives the same positive, significant result after the same demographic controls.</p>
+<p><b>Why age² is in there:</b> earnings may peak and then decline as people shift priorities — his example was
+the finance career that turns into an antique dealership in Vermont. A linear age term can't bend; age² can.</p>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="kitchensink">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🚿</div>
+            <div>
+              <div class="sc-tag">05 · Method rule</div>
+              <div class="sc-name">The kitchen-sink problem — why more controls is not better</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Throw enough correlated controls into the regression and the education coefficient <b>gets swamped</b> — a
+real causal effect can be made to look like it disappeared. This happens <b>mechanically</b>, not
+substantively: other variables correlated with education absorb its explanatory power.</p>
+
+<div class="callout"><span class="c-label">Seamans' rule for including a control</span>
+<p>Include a variable <b>only if there is a theoretical story or literature support</b> for its relevance. Not
+because it lifts fit. If you don't have the domain knowledge yet, a <b>literature review buys it fast</b> —
+that's the cheap part of the work, and it's what separates a defensible specification from a fishing trip.</p></div>
+
+<h4>The two questions are not the same question</h4>
+<table class="dt">
+<tr><th>Kitchen sink</th><th>Causal specification</th></tr>
+<tr><td>Asks</td><td><b>"What best predicts earnings?"</b> vs. <b>"Does education <i>cause</i> earnings?"</b></td></tr>
+<tr><td>Selection</td><td>Everything correlated with the outcome vs. only what theory or literature justifies</td></tr>
+<tr><td>Success</td><td>Best fit vs. a coefficient you can defend as causal</td></tr>
+</table>
+<p>This is exactly where a data scientist's instinct — maximise predictive fit, keep whatever helps — pulls in
+the wrong direction. It's the right instinct for a different job.</p>
+
+<h4>The parental wealth example</h4>
+<p>Wealthy parents can pay for more education, better schools, tutoring and connections. That may well matter
+<b>more</b> than education itself. But — and this is the point — <b>education can still have an independent
+causal effect</b> underneath it. Controlling parental wealth into the model doesn't settle the question; it
+just moves where the argument has to happen.</p>
+</div></div>
+      </div>
+
+      <div class="divider">Project STAR — a real randomised experiment, and its cracks</div>
+
+      <div class="sc bl-accent" id="star-design">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧪</div>
+            <div>
+              <div class="sc-tag">06 · Case</div>
+              <div class="sc-name">Project STAR — the design, and why there are three arms</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>Tennessee Student Teacher Achievement Ratio (STAR)</b>, late 1980s. Analysed by <b>Alan Krueger</b>,
+the Princeton labor economist — likely a Nobel candidate, who passed away prematurely.</p>
+
+<h4>The design</h4>
+<ul>
+<li><b>11,600 students and teachers</b>, randomly assigned to one of three conditions</li>
+<li>Randomization happened <b>within schools, not across schools</b> — that holds geographic and socioeconomic factors constant, so you're not accidentally comparing a rich district to a poor one</li>
+<li>Students were intended to stay in the <b>same class type for four years</b>, kindergarten through third grade</li>
+</ul>
+
+<table class="dt">
+<tr><th>Condition</th><th>Class</th><th>What it isolates</th></tr>
+<tr><td>1 · Small</td><td>13–17 students</td><td>Small class <b>and</b> low student–teacher ratio</td></tr>
+<tr><td>2 · Regular</td><td>22–25 students</td><td>Baseline</td></tr>
+<tr><td>3 · Regular + aide</td><td>22–25 students, full-time teacher's aide</td><td>Low ratio <b>without</b> a small class</td></tr>
+</table>
+
+<div class="callout"><span class="c-label">Why three conditions and not two</span>
+<p>The third arm <b>separates class size from student–teacher ratio</b>. If only class size matters, the aide
+condition should perform no differently from plain regular. If only the ratio matters, a class of 100 with
+10 teachers should perform the same as a class of 10 with 1 teacher. The aide arm is the only thing that
+can tell those two stories apart — which is the entire reason it's in the design.</p></div>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="star-results">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">📊</div>
+            <div>
+              <div class="sc-tag">07 · Case</div>
+              <div class="sc-name">Project STAR — Table 1, the main result, and why low R² is fine</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<h4>Table 1 is the randomization check</h4>
+<p>Summary statistics exist to answer one question: <b>did the randomization actually work?</b> You compare the
+groups on things treatment couldn't have caused, and look for balance.</p>
+<ul>
+<li><b>Poverty rates, race and age</b> look similar across conditions; joint p-values mostly <b>above 0.05</b></li>
+<li>⚠️ The <b>poverty rate difference approaches significance</b> — kids in small classes were slightly less likely to be classified as poor. That's <b>imperfect randomization</b>, and you have to say so</li>
+<li>⚠️ <b>Attrition is statistically significantly higher in larger classes</b> (joint p ≈ <b>0.02</b>) — families were more likely to pull their children out of the bigger classes</li>
+</ul>
+
+<h4>The main finding</h4>
+<ul>
+<li>Students in <b>small classes scored ~4–5 percentile points higher</b> on standardized tests at end of year — statistically significant</li>
+<li><b>Regular class with a teacher's aide:</b> positive coefficient but <b>not statistically significant</b></li>
+<li>→ It's <b>class size that matters, not the student–teacher ratio</b>. That's the payoff of having the third arm</li>
+<li>Adding <b>school fixed effects and demographic controls does not materially change</b> the result — which is what you want to see</li>
+</ul>
+
+<h4>The R² point</h4>
+<p><b>R² ranges from 0.01 to 0.31</b> across specifications. That is fine. <b>The goal here is causal
+identification, not prediction</b> — you are not trying to explain test scores, you are trying to isolate one
+coefficient you can defend. A causal paper with an R² of 0.01 can be completely correct.</p>
+
+<h4>The non-parametric result</h4>
+<p>Beyond the regression: the <b>full distribution</b> of third-grade test scores <b>shifted rightward</b> for
+small-class students versus regular-class students. Not just the mean moving — the whole distribution. That's
+a much harder result to explain away than a single significant coefficient.</p>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="star-threats">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">⚠️</div>
+            <div>
+              <div class="sc-tag">08 · Case</div>
+              <div class="sc-name">Project STAR — the five things that threaten it anyway</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Even a real randomised experiment with 11,600 students has cracks. These are the five worth being able to
+name, because they generalise to <i>any</i> field experiment.</p>
+
+<div class="anom-list">
+  <div class="anom"><span class="anom-b bad">Attrition</span><div class="anom-text">
+    <strong>Families in larger classes were more likely to withdraw their children.</strong> If the families who
+    leave are also the most motivated, you've quietly removed the strongest students from the large-class group
+    — which biases the comparison in a direction you can't sign without knowing who left.
+  </div></div>
+  <div class="anom"><span class="anom-b bad">Switching</span><div class="anom-text">
+    <strong>Some families refused their assigned class</strong> and pressured principals to move their child. The
+    result: class sizes in the "small" condition occasionally reached <strong>18–20</strong>, and some families
+    assigned to larger classes moved into the aide condition. Assignment stopped being the same thing as treatment.
+  </div></div>
+  <div class="anom"><span class="anom-b bad">Hawthorne</span><div class="anom-text">
+    <strong>Families who know their child is in an experiment change their behaviour.</strong> Parents who believed
+    a small class meant their kid was marked as smart may have pushed them harder — so part of the measured effect
+    is the parents, not the class.
+  </div></div>
+  <div class="anom"><span class="anom-b bad">Substitution</span><div class="anom-text">
+    <strong>Families assigned to large classes compensate.</strong> More tutoring, more after-school programs. That
+    narrows the measured gap — so the estimate is <em>conservative</em> relative to a world where nobody could
+    compensate, which is not the world policy operates in either.
+  </div></div>
+  <div class="anom"><span class="anom-b bad">Scalability</span><div class="anom-text">
+    <strong>~11,000 students in a few Tennessee areas.</strong> Scaling to all of Tennessee — let alone the US —
+    would need hundreds of thousands of additional teachers and bigger school buildings, at enormous cost. An
+    effect that's real at experiment scale can still be unbuildable at policy scale.
+  </div></div>
+</div>
+
+<div class="callout"><span class="c-label">The epistemics line</span>
+<p>A hardcore labor economist would say the data are <b>"consistent with a causal argument"</b> rather than proof
+of causality. Randomization here is strong evidence — it is not absolute proof. Use that phrasing; it's the
+register the field actually speaks in.</p></div>
+</div></div>
+      </div>
+
+      <div class="divider">Prediction vs. causal inference — two different jobs</div>
+
+      <div class="sc bl-accent" id="pred-vs-causal">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔀</div>
+            <div>
+              <div class="sc-tag">09 · Framing</div>
+              <div class="sc-name">Nothing plays the role R² plays — the causal work is the argument</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p>Machine learning and causal inference answer <b>fundamentally different questions</b>, and the difference
+shows up hardest in what you're allowed to use to pick between approaches.</p>
+
+<table class="dt">
+<tr><th>Machine learning</th><th>Causal inference</th></tr>
+<tr><td>Question</td><td><b>What best predicts Y?</b> vs. <b>Does X cause Y?</b></td></tr>
+<tr><td>Diagnostics</td><td>R², cross-validation error, AUC vs. approach-specific checks (first-stage F for IV, balance for matching, lambda for Heckman)</td></tr>
+<tr><td>Model choice</td><td>Pick the best predictive fit vs. <b>no statistic picks it for you</b></td></tr>
+<tr><td>Insignificant terms</td><td>Drop them vs. <b>keep them — they can be the finding</b></td></tr>
+<tr><td>What you ship</td><td>A model vs. <b>a model plus an argument</b></td></tr>
+</table>
+
+<div class="callout"><span class="c-label">The thing to actually memorise</span>
+<p>Causal inference <b>has</b> diagnostics — the first-stage F-statistic for IV is a real one. But those
+diagnostics <b>cannot be used to select among approaches</b> the way R² selects among predictive models. You
+must <b>argue that your approach is appropriate</b>, not just show that a diagnostic passed. There is no
+number you can point at instead of thinking.</p></div>
+
+<h4>Insignificant ≠ discardable</h4>
+<p>In predictive work you throw out variables that don't earn their place. In causal work that's a mistake.
+<b>The null result on the teacher's-aide condition in STAR is itself an important finding</b> — it's what rules
+out student–teacher ratio as the mechanism. Delete it because <code>p &gt; 0.05</code> and you've deleted the
+answer.</p>
+</div></div>
+      </div>
+
+      <div class="divider">Matching — building a counterfactual out of observables</div>
+
+      <div class="sc bl-accent" id="psm">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎚️</div>
+            <div>
+              <div class="sc-tag">10 · Method</div>
+              <div class="sc-name">Propensity score matching — one scalar, and three knobs</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>The motivation:</b> when randomization isn't available, construct the counterfactual by matching each
+treated unit to an observationally similar untreated one.</p>
+
+<h4>The intuition</h4>
+<p>Jerry went to the hospital. Find the untreated person who looks most like Jerry — Rob: similar age, married
+20+ years, glasses, facial hair — and compare their outcomes. Rob is standing in for the version of Jerry who
+stayed home. It's the twin analogy, executed on data instead of genetics.</p>
+
+<h4>The propensity score</h4>
+<ol>
+<li>Run a <b>probit regression of the treatment indicator on the observable covariates</b></li>
+<li>That collapses all the observables into <b>a single scalar between 0 and 1</b> — the probability of receiving treatment</li>
+<li><b>Match on that scalar</b>, not on the full covariate vector. One number instead of twenty</li>
+</ol>
+
+<h4>Common support</h4>
+<p>The range of propensity scores where <b>both treated and untreated observations exist with meaningful
+density</b>. If the two populations look very different there's little common support and good matches are
+hard to find.</p>
+<ul>
+<li><b>Dittmar's printing press example:</b> adopters cluster at high propensity scores, non-adopters at low ones; common support exists <b>roughly between 0.15 and 0.8</b></li>
+<li>There's <b>some art</b> in defining the support region — no strict rule of thumb. Which means you should show the plot, not just assert the range</li>
+</ul>
+
+<h4>The two knobs — caliper and replacement</h4>
+<table class="dt">
+<tr><th>Knob</th><th>Tighter / off</th><th>Looser / on</th></tr>
+<tr><td>Caliper</td><td>Better matches, but <b>more treated observations dropped</b> because no close match exists</td><td>More observations retained, but the matches are <b>less similar</b></td></tr>
+<tr><td>Replacement</td><td><b>No replacement</b> — each control used at most once; some treated units get worse matches</td><td><b>With replacement</b> — better matches, but some control units carry <b>very high weight</b> and may be outliers</td></tr>
+</table>
+<p><b>Caliper</b> = the maximum allowable distance between a treated unit's propensity score and its match.
+<b>Sensitivity analysis is the job:</b> vary the caliper and check whether the result changes materially. If
+your conclusion only survives at one caliper, you don't have a conclusion.</p>
+
+<div class="callout"><span class="c-label">The critique that never goes away</span>
+<p>Propensity score matching <b>only controls for observable characteristics</b>. Unobservable differences —
+immune system strength, intrinsic motivation — are untouched by it. Current best practice is therefore to
+<b>use matching alongside another technique</b> (instrumental variables, difference-in-differences) so the
+result is robust across approaches rather than resting on one set of assumptions.</p></div>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="psm-cases">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">💼</div>
+            <div>
+              <div class="sc-tag">11 · Cases</div>
+              <div class="sc-name">Three matching studies — job training, CEO confidence, violent video games</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>NSW job training — when the naive answer is backwards</h4>
+<p><b>National Supported Work Demonstration</b>, mid-1970s: temporary employment, counseling and work
+experience for disadvantaged workers — high school dropouts, ex-drug addicts, ex-criminals.</p>
+<ul>
+<li><b>Naïve OLS:</b> treated workers earned roughly <b>$5,000–6,000 less</b> than untreated workers five years later — i.e. the program looks actively harmful</li>
+<li><b>After propensity score matching:</b> the estimated difference falls to about <b>$550</b> and is <b>no longer statistically significant</b></li>
+<li><b>Sensitivity:</b> tightening the caliper from 0.01 to 0.001 moves the point estimate but <b>not the conclusion</b> — no statistically significant difference in any specification</li>
+<li><b>Interpretation:</b> the naive comparison was misleading because the treated were a <i>very different population</i> from the comparison group. Matching didn't find an effect; it removed a fake one</li>
+</ul>
+
+<h4>CEO confidence — a capstone group's best-practice example</h4>
+<p>PwC data, 2021. <b>Question:</b> does CEO confidence predict beating analyst consensus revenue forecasts?
+Treatment = "very confident" CEOs; control = everyone else.</p>
+<ul>
+<li><b>Unadjusted:</b> <b>41%</b> of "not confident at all" CEOs beat consensus vs. <b>61%</b> of "very confident" CEOs</li>
+<li><b>The worry:</b> reverse causality — CEOs who already have early positive signals are the ones who report high confidence</li>
+<li>PSM used to match very confident CEOs to similar less-confident CEOs on observables; the <b>common support plot showed substantial overlap</b></li>
+<li>⭐ <b>The key strength:</b> the group varied <b>both caliper size and matching method</b>, and the <b>t-statistic stayed above 2 across every specification</b></li>
+</ul>
+<div class="callout"><span class="c-label">Why he held this up</span>
+<p>This is the recommended best practice: <b>show the result does not depend on any single matching choice</b>.
+Robustness reported up front is what separates a credible matching paper from a lucky one.</p></div>
+
+<h4>Violent video games — the effect that mostly dissolves</h4>
+<p>6,500 eighth-grade students; heavy violent video game players matched to observationally similar non-players.</p>
+<table class="dt">
+<tr><th>Outcome (males)</th><th>Unmatched</th><th>After matching</th></tr>
+<tr><td>Vandalism</td><td>~+20%</td><td>~−4% · <b>not significant</b></td></tr>
+<tr><td>Cheating</td><td>~+17%</td><td>Shrinks sharply · <b>not significant</b></td></tr>
+<tr><td>Hit someone</td><td>~+20%</td><td>Shrinks sharply · <b>not significant</b></td></tr>
+<tr><td>Marijuana use</td><td>+6%</td><td>−3% · not significant</td></tr>
+</table>
+<ul>
+<li><b>Males:</b> the correlation between violent video games and violent behaviour <b>largely disappears once you compare like with like</b></li>
+<li>The marijuana flip (+6% → −3%, insignificant) prompted the aside that video games may have a <i>calming</i> effect</li>
+<li><b>Females:</b> some effects persist after matching — group fight involvement <b>+12% unmatched → +4% matched, still statistically significant</b></li>
+</ul>
+</div></div>
+      </div>
+
+      <div class="sc bl-sky" id="psm-warning">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico sky">🚨</div>
+            <div>
+              <div class="sc-tag sky">12 · Cautionary tale</div>
+              <div class="sc-name">The sustainability paper that only works in one corner of the parameter space</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<h4>The original</h4>
+<ul>
+<li><b>2014, <i>Management Science</i></b> — top-tier journal, and the <b>most-cited paper in the journal</b></li>
+<li><b>Claim:</b> 180 US companies that voluntarily adopted sustainability policies by 1993 significantly outperformed matched counterparts in <b>stock market and accounting performance</b> over the long term</li>
+<li>The matched sample showed <b>no statistically significant pre-period differences</b> across observable characteristics — which is exactly what a good matching paper is supposed to show</li>
+</ul>
+
+<h4>The replication</h4>
+<ul>
+<li><b>Andrew King (Boston University)</b> attempted to replicate it and <b>could not obtain the original data</b></li>
+<li>He reconstructed the data himself and ran a <b>battery of sensitivity tests</b> — varying caliper, varying matching method</li>
+<li><b>Results ranged from strongly positive to negative</b>, intersecting zero in <b>most</b> specifications</li>
+<li>The original result appears <b>only in a narrow region of the parameter space</b> — which is what cherry-picking a matching specification looks like from the outside</li>
+<li>The authors <b>have not publicly responded</b>. King's replication paper is <b>not published — it lives on his website</b></li>
+</ul>
+
+<div class="callout sky"><span class="c-label">The lesson</span>
+<p>With propensity score matching, <b>transparency and robustness testing across many specifications is
+essential</b>. Reporting only the specification that yields the result you wanted is a <b>serious
+methodological failure</b> — and the knobs (caliper, matching method, replacement) are exactly the surface
+where it happens. Report the surface, not the point.</p></div>
+</div></div>
+      </div>
+
+      <div class="divider">Selection models — when the data itself is missing non-randomly</div>
+
+      <div class="sc bl-accent" id="heckman">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🪟</div>
+            <div>
+              <div class="sc-tag">13 · Method</div>
+              <div class="sc-name">Heckman selection — correcting for who ended up in your sample</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<p><b>The motivation:</b> when data are <b>not missing at random</b>, OLS on the observed sample produces biased
+estimates. Matching fixes <i>who you compare</i>; Heckman fixes <i>who made it into the data at all</i>.</p>
+
+<h4>The married-women wage example</h4>
+<ul>
+<li>Dataset of married women — some in the workforce (wages observed), some not (wages missing)</li>
+<li>The missing wages are <b>not missing randomly</b>: women with more children are less likely to be in the workforce</li>
+<li>If the women who exit the workforce would have earned lower (or higher) wages, OLS on the working sample gives a <b>biased estimate of the education–earnings relationship</b></li>
+</ul>
+
+<h4>The correction — "Heckit" (Heckman + probit/logit)</h4>
+<ol>
+<li>Run a <b>selection equation</b> — probit or logit predicting whether the person is in the workforce, using <b>education, age and number of children</b>. Number of children comes back <b>negative and statistically significant</b>: more children → less likely in the workforce</li>
+<li>Use the coefficients from that selection equation to construct a correction variable — <b>lambda, the inverse Mills ratio</b></li>
+<li><b>Include lambda in the main earnings regression</b>, where it absorbs the selection effect</li>
+</ol>
+
+<div class="callout"><span class="c-label">Exclusion restriction — selection-model flavour</span>
+<p>Ideally include a variable in the <b>selection equation</b> that predicts participation but <b>does not
+directly affect the outcome</b>. Here that's <b>number of children</b>: plausibly it moves whether a woman
+works, but not her wage <i>rate</i>. Same logical shape as an IV's exclusion restriction, same fact that you
+argue it rather than test it.</p></div>
+
+<h4>What the correction actually did</h4>
+<p>The education coefficient drops slightly, <b>0.079 → 0.077</b>. Small, but readable: it suggests women out of
+the workforce would have earned <b>slightly less</b> than observationally similar working women, so the
+education–earnings relationship is <b>marginally weaker</b> once selection is accounted for.</p>
+<p>Stata has a <b>one-step <code>heckman</code> command</b>; the professor walked through the multi-step version
+for conceptual clarity, so you can see where lambda comes from rather than trusting a black box.</p>
+
+<h4>Bank mergers — Levine et al.</h4>
+<ul>
+<li><b>Question:</b> does <b>geographic overlap of bank branches</b> affect merger probability, stock returns on announcement, and post-merger performance?</li>
+<li><b>Why no randomization:</b> bank CEOs make deliberate, strategic merger decisions. Nobody is randomly assigned a merger</li>
+<li><b>Selection variable:</b> <b>distance between the acquirer's state and the target's state</b> — closer means more likely to merge</li>
+<li><b>Result:</b> <b>lambda is not statistically significant</b>, which suggests <b>limited selection bias</b>; the coefficients on the overlap variables change little after correction</li>
+<li>The paper <b>also runs an instrumental variable approach alongside</b> the Heckman correction — the multi-method norm again</li>
+</ul>
+<p><b>Read the insignificant lambda correctly:</b> it isn't a failed correction. It's evidence that selection
+wasn't driving your result — and it's worth reporting for exactly that reason.</p>
+</div></div>
+      </div>
+
+      <div class="divider">Instrumental variables — borrowing randomness from somewhere else</div>
+
+      <div class="sc bl-accent" id="iv">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔧</div>
+            <div>
+              <div class="sc-tag">14 · Method</div>
+              <div class="sc-name">2SLS — what an instrument has to do, and what it costs you</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+<h4>The core idea</h4>
+<p>Find a third variable <b>Z</b> — the instrument — that <b>affects X</b> (the endogenous variable) but
+<b>does not directly affect Y</b> (the outcome). Z affects Y <i>only</i> through its effect on X: that is the
+<b>exclusion restriction</b>. This breaks the link between X and the unobserved confounders U, which is what
+lets you identify the causal effect.</p>
+
+<h4>Two-stage least squares</h4>
+<ol>
+<li><b>Stage 1:</b> regress <b>X on Z</b> (plus controls) to create <b>X-tilde</b> — a version of X purged of the influence of the unobservables</li>
+<li><b>Stage 2:</b> regress <b>Y on X-tilde</b> (plus controls)</li>
+</ol>
+<p>In practice Stata's <code>ivreg</code> runs both stages simultaneously — <b>the two-step framing is
+conceptual</b>, not something you type twice.</p>
+
+<div class="callout"><span class="c-label">Why standard errors go up — and why that's structural</span>
+<p><b>X-tilde is itself an estimated quantity</b> carrying its own uncertainty. Using an estimated variable as
+a regressor <b>injects additional noise into the second stage</b>. Standard errors can increase
+substantially — sometimes the coefficient stays roughly the same size but <b>loses statistical
+significance</b>. That is IV working as designed, not IV failing.</p></div>
+
+<h4>Diagnostics</h4>
+<table class="dt">
+<tr><th>Check</th><th>Requirement</th></tr>
+<tr><td>Relevance</td><td>The coefficient on <b>Z in the first stage must be statistically significant</b> — sign can be positive or negative</td></tr>
+<tr><td>Strength</td><td><b>First-stage F-statistic must exceed 10.</b> Below that the instrument is <b>weak</b></td></tr>
+<tr><td>Exclusion</td><td><b>Cannot be tested statistically</b> in the standard case — it must be <b>argued on theoretical grounds</b></td></tr>
+</table>
+<p>The exclusion restriction is the <b>art component</b> of IV. <b>No diagnostic can confirm it.</b> That's why
+half of an IV paper is prose about why the instrument is plausible, and why the good instruments in the
+literature are the ones with a story you can say out loud without flinching.</p>
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="iv-cases">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎲</div>
+            <div>
+              <div class="sc-tag">15 · Cases</div>
+              <div class="sc-name">The IV zoo — six instruments and what each one buys</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<table class="dt">
+<tr><th>Study</th><th>X → Y</th><th>Instrument Z</th><th>Result</th></tr>
+<tr><td>Draft lottery</td><td>Military service → earnings</td><td>Vietnam draft lottery number</td><td>Service <b>lowers earnings ~$2,000–2,700/yr</b></td></tr>
+<tr><td>Quarter of birth</td><td>Years of education → earnings</td><td>Birth quarter vs. school entry cutoff</td><td>Return ≈ <b>0.08 log points</b>/yr</td></tr>
+<tr><td>Printing press</td><td>Press adoption → city growth</td><td>Distance from Mainz</td><td>Only Mainz distance matters</td></tr>
+<tr><td>Energy drinks</td><td>Shelf availability → sales</td><td>Distance to nearest bottling plant</td><td>Student capstone</td></tr>
+<tr><td>Inspections</td><td>Property vintage/type → capex risk</td><td>Inspector leniency</td><td>Student capstone</td></tr>
+<tr><td>College proximity</td><td>Years of education → log wages</td><td>Colleges in childhood county</td><td>IV <b>~0.13</b> vs. OLS <b>~0.048</b></td></tr>
+</table>
+
+<h4>Vietnam draft lottery — Angrist</h4>
+<ul>
+<li>Between <b>1970 and 1972</b>, random lottery numbers were assigned to birth dates; men below a cutoff were drafted</li>
+<li>The number is <b>random by construction</b> → it shouldn't affect earnings except through military service</li>
+<li><b>First stage:</b> a low lottery number raises the probability of veteran status by <b>~16 percentage points</b></li>
+<li><b>Result:</b> military service lowers earnings by roughly <b>$2,000–2,700 per year</b></li>
+<li><b>Imperfections:</b> some draft-eligible men were exempted (health, other reasons); some high-number men volunteered anyway. Not a perfect instrument — but a strong one</li>
+</ul>
+
+<h4>Quarter of birth — Angrist and Krueger</h4>
+<ul>
+<li>School entry cutoffs mean children born in <b>Q1 are slightly older</b> when they start school, so they can drop out at 16 with <b>slightly more education</b> than Q4 children</li>
+<li><b>First stage:</b> Q1 birth associated with slightly fewer years of education on average — shown graphically across birth cohorts <b>1930–1940</b></li>
+<li><b>Result:</b> return to education <b>~0.08 log points per year</b>, similar to the OLS estimates (~0.07–0.079)</li>
+<li><b>The critique:</b> strategic parents may <i>plan</i> births to optimise school entry timing, which would correlate birth quarter with parental wealth and hence earnings. He acknowledged you have to work hard to construct that story</li>
+<li>Standard errors increase relative to OLS, as expected</li>
+</ul>
+
+<h4>Printing press and city growth — Dittmar</h4>
+<ul>
+<li>Cities <b>closer to Mainz</b> — where the printing press was invented — were more likely to adopt it earlier</li>
+<li><b>Exclusion argument:</b> distance from Mainz shouldn't directly affect a city's economic growth except through press adoption</li>
+<li>⭐ <b>The robustness check worth stealing:</b> he reruns it with distance to <b>Amsterdam, London, Paris, Venice and Wittenberg</b> as alternative instruments. <b>None of them matter</b> — only distance to Mainz. That confirms it's the printing press connection driving the result, <b>not mere proximity to a large city</b></li>
+<li>The paper also uses <b>propensity score matching in the appendix</b> alongside IV in the main body</li>
+</ul>
+
+<h4>Energy drink availability — student capstone</h4>
+<ul>
+<li><b>Z = distance to the nearest bottling plant.</b> Closer plant → more frequent restocking → higher shelf availability</li>
+<li><b>Exclusion argument:</b> consumers do not know or care where the bottling plant is, so distance shouldn't directly affect their purchase decision</li>
+<li>He noted it's similar in spirit to Dittmar's distance instrument, and praised the approach</li>
+</ul>
+
+<h4>Property inspection reports — student capstone</h4>
+<ul>
+<li><b>Z = inspector leniency.</b> Inspectors are <b>randomly assigned</b> to properties — analogous to the random assignment of patent examiners at the USPTO</li>
+<li>Some inspectors are historically more lenient, some stricter, conditional on experience and specialty</li>
+<li><b>Random assignment means leniency is independent of the property's underlying capex needs</b>; leniency affects capex indirectly through the inspection report but shouldn't directly affect capex risk</li>
+<li>He highlighted the <b>random assignment feature as the key strength</b> — it's the closest an observational instrument gets to a lottery</li>
+</ul>
+
+<h4>Proximity to colleges — Card</h4>
+<ul>
+<li><b>Z = the number of two- and four-year colleges in the county where the individual grew up.</b> Growing up near colleges may raise educational attainment through exposure and aspiration</li>
+<li><b>Caveat he flagged:</b> not a perfect instrument — many other things may differ between areas with more vs. fewer colleges</li>
+<li><b>First-stage F = 124</b>, well above the threshold of 10</li>
+<li><b>Result:</b> the return to education <b>nearly triples</b> relative to OLS — <b>~0.048 OLS vs. ~0.13 IV</b> — with correspondingly larger standard errors</li>
+<li>Stata: <code>ivreg</code> with the endogenous-variable/instrument notation; first-stage results via the <code>first</code> option after the comma</li>
+</ul>
+</div></div>
+      </div>
+
+      <div class="divider">Reference</div>
+
+      <div class="sc bl-green" id="hooks">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">⭐</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Day 4 exam hooks — the things worth memorising</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<ol>
+<li><b>Every technique today is a counterfactual machine.</b> Pasteur's sheep get one for free; the rest of the day is what you do when you can't randomize.</li>
+<li><b>The hospital example is the selection-bias template.</b> Sicker patients self-select into treatment → the naive comparison says treatment harms. Same shape as NSW job training.</li>
+<li><b>First-stage F must exceed 10</b>, and the first-stage coefficient on Z must be significant. Below 10 = <b>weak instrument</b>.</li>
+<li><b>The exclusion restriction cannot be tested — it is argued.</b> That's the art of IV, and no diagnostic substitutes for it.</li>
+<li><b>IV widens standard errors by construction.</b> X-tilde is estimated, so stage 2 inherits its noise. The coefficient can survive while significance doesn't — that's not a failure.</li>
+<li><b>PSM only balances observables.</b> Unobservables (motivation, immune system) are untouched — which is why best practice pairs it with IV or diff-in-diff.</li>
+<li><b>Caliper and replacement are sensitivity knobs, not settings.</b> Tight caliper = better matches, more dropped units. Replacement = better matches, over-weighted controls.</li>
+<li><b>Reporting one matching specification is the King-vs-sustainability failure.</b> Report the whole surface; the CEO-confidence capstone (t &gt; 2 across every caliper and method) is what good looks like.</li>
+<li><b>Lambda insignificant = limited selection bias.</b> In the bank merger paper that's a reported result, not a dud — and the education coefficient only moved 0.079 → 0.077 in the wage example.</li>
+<li><b>The STAR aide arm is a null that IS the finding.</b> It's what rules out student–teacher ratio and leaves class size standing. Never delete an insignificant coefficient in causal work.</li>
+<li><b>Low R² is fine in causal work</b> — STAR ran 0.01 to 0.31. You're identifying a coefficient, not predicting an outcome.</li>
+<li><b>The kitchen-sink regression answers a different question.</b> "What predicts earnings" ≠ "does education cause earnings". Include a control only with a theoretical story or literature support.</li>
+<li><b>Table 1 is the randomization check, and attrition is what breaks it.</b> In STAR, poverty balance approached significance and attrition was significantly higher in large classes (joint p ≈ 0.02).</li>
+<li><b>Nothing plays the role R² plays.</b> Causal diagnostics exist but cannot select among approaches — you must argue that your approach is appropriate.</li>
+<li><b>Multi-method is the norm, not a flourish.</b> Dittmar runs IV + PSM; Levine runs Heckman + IV. If two different sets of assumptions agree, the result travels.</li>
+</ol>
+
+<div class="callout green"><span class="c-label green">The one-line summary of Day 4</span>
+<p><b>Every technique today is one answer to the same question:</b> <i>where do I get a credible
+counterfactual?</i> Randomization builds one, matching finds one in the observables, Heckman corrects for who
+made it into the sample, and IV borrows randomness from somewhere else. Pick by which counterfactual you can
+<b>defend</b> — not by which one fits best.</p></div>
+
+</div></div>
+      </div>
+    </div>
+    <div id="panel-assignments" class="day-panel">
+      <div class="divider">Data Driven Decision Making — graded components</div>
+
+      <div class="assign-card">
+        <div class="ac-ico">✅</div>
+        <div class="ac-b">
+          <div class="ac-label">Pre-module</div>
+          <div class="ac-title">Individual assignment + group IV assignment<span class="done-badge">✓ in</span></div>
+          <div class="ac-desc">An individual assignment plus a <b>group instrumental-variable assignment</b>. Seamans reviewed several of the group submissions in class and praised the quality genuinely — so they're in and they've been read.</div>
+          <div class="ac-due">Submitted <span>pre-module</span></div>
+        </div>
+      </div>
+
+      <div class="assign-card">
+        <div class="ac-ico">🙋</div>
+        <div class="ac-b">
+          <div class="ac-label">In class</div>
+          <div class="ac-title">Individual participation</div>
+          <div class="ac-desc">Graded on <b>attendance and engagement</b> — participation to the best of each student's ability, not brilliance. The in-class Stata exercise runs to <b>5pm Thursday</b> in capstone-group breakout rooms and is <b>debriefed Friday morning</b>.</div>
+          <div class="ac-due">Runs <span>Aug 20–21</span> · KMC 1-70</div>
+        </div>
+      </div>
+
+      <div class="assign-card">
+        <div class="ac-ico">📝</div>
+        <div class="ac-b">
+          <div class="ac-label">Post-module · 40%</div>
+          <div class="ac-title">Group project</div>
+          <div class="ac-desc">Details forthcoming — the <b>brief posts to Brightspace by end of day Friday Aug 21</b>. This is the only group deliverable left in Module 3.</div>
+          <div class="ac-due">Window <span>Aug 23 – Sep 27</span></div>
+        </div>
+      </div>
+
+      <div class="callout sky"><span class="c-label">Who presses submit</span>
+      <p>Standing rule after DDD A2 went in late: on a group deliverable, settle <b>who presses submit and
+      when</b> — not just whether your part is done. Get the name and the time on the record early.</p></div>
+
+      <div class="divider">Before the exercise</div>
+
+      <div class="assign-card">
+        <div class="ac-ico">🖥️</div>
+        <div class="ac-b">
+          <div class="ac-label">Next steps</div>
+          <div class="ac-title">Stata setup</div>
+          <div class="ac-desc">Open the <b>Stata do-file</b> from Brightspace (MSBA 2026 folder) <b>before</b> the in-class exercise, and check the working directory and data download — Sanchez is helping with setup during the break. The professor saves an <b>annotated version of the do-file at the end of the day</b>; grab that one too. At least one laptop with Stata per group.</div>
+          <div class="ac-due">Also: <span>group project brief</span> lands on Brightspace end of Fri Aug 21</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'notes-unlocked', PWD = 'huncho';
+if (sessionStorage.getItem(KEY) === 'true') unlock();
+document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+function tryUnlock() {
+  if (document.getElementById('gate-input').value.trim().toLowerCase() === PWD) {
+    sessionStorage.setItem(KEY, 'true'); unlock();
+  } else {
+    document.getElementById('gate-err').textContent = 'wrong password';
+    document.getElementById('gate-input').value = '';
+  }
+}
+function unlock() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'block';
+  document.getElementById('main').style.display = 'block';
+}
+function toggle(hdr) { hdr.closest('.sc').classList.toggle('open'); }
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+const navLinks = document.querySelectorAll('.sb-nav a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+document.querySelectorAll('.sc[id]').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
