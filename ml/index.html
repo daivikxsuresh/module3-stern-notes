@@ -246,10 +246,22 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: 
     <a href="#textanalytics"><span class="dot"></span>Text Analytics</a>
     <a href="#tooling"><span class="dot"></span>R vs. the Agents</a>
   </div>
+  <div class="sb-group">Day 3 — Wed Aug 19</div>
+  <div class="sb-nav">
+    <a href="#fakereviews"><span class="dot"></span>Fake Reviews Dataset</a>
+    <a href="#tfidf"><span class="dot"></span>TF-IDF & the TDM</a>
+    <a href="#text-models"><span class="dot"></span>KNN & Decision Tree</a>
+    <a href="#randomforest"><span class="dot"></span>Random Forest</a>
+    <a href="#featureselect"><span class="dot"></span>Feature Selection</a>
+    <a href="#catalog3"><span class="dot"></span>Catalog Spend Contest</a>
+    <a href="#topics"><span class="dot"></span>Topics & Embeddings</a>
+    <a href="#llms"><span class="dot"></span>How LLMs Work</a>
+  </div>
   <div class="sb-group">Reference</div>
   <div class="sb-nav">
     <a href="#hooks"><span class="dot"></span>Exam Hooks — Day 1</a>
     <a href="#hooks2"><span class="dot"></span>Exam Hooks — Day 2</a>
+    <a href="#hooks3"><span class="dot"></span>Exam Hooks — Day 3</a>
   </div>
 </nav>
 
@@ -257,10 +269,11 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: 
   <div id="hdr">
     <div class="hdr-eyebrow">NYU Stern · MSBAi · Module 3 · Machine Learning</div>
     <h1 class="hdr-title">Machine <span>Learning</span></h1>
-    <p class="hdr-sub">Prof. Ravi Bapna · association rules · clustering · anomaly detection · classification metrics · ensembles · numeric prediction</p>
+    <p class="hdr-sub">Prof. Ravi Bapna · association rules · clustering · anomaly detection · classification metrics · ensembles · numeric prediction · text analytics · random forest · LLMs</p>
     <div class="day-tabs">
       <button class="day-tab active" data-panel="day1">Day 1 — Mon Aug 17</button>
       <button class="day-tab" data-panel="day2">Day 2 — Tue Aug 18</button>
+      <button class="day-tab" data-panel="day3">Day 3 — Wed Aug 19</button>
       <button class="day-tab" data-panel="assignments">Assignments</button>
     </div>
   </div>
@@ -1874,6 +1887,424 @@ failures are the ones that still produce a plausible-looking number.</p></div>
 <p><b>The metric is the decision.</b> Every choice today — accuracy vs F1, threshold, ROC vs lift, profit
 matrix — was really the same question: <i>what does being wrong cost, and in which direction?</i>
 Answer that and the model selection follows.</p></div>
+
+</div></div>
+      </div>
+    </div>
+
+    <div id="panel-day3" class="day-panel">
+
+      <div class="divider">Text analytics end to end — and what is actually inside an LLM</div>
+
+      <div class="sc bl-accent open" id="fakereviews">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🕵️</div>
+            <div>
+              <div class="sc-tag">01 · Setup</div>
+              <div class="sc-name">The fake-reviews dataset, and turning sentences into something a model can eat</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p><b>1,600 hotel reviews</b>, deliberately <b>balanced 800 genuine / 800 fake</b>. The fakes were not scraped
+&mdash; they were <b>written to order by paid Amazon Mechanical Turk workers</b>, which is what makes the
+label trustworthy: somebody knows for a fact which ones are fabricated.</p>
+
+<table class="dt">
+<tr><th>Column</th><th>What it holds</th></tr>
+<tr><td>deceptive</td><td>The <b>label</b> &mdash; genuine or fake. This is what we predict.</td></tr>
+<tr><td>hotel</td><td>Which hotel the review is about</td></tr>
+<tr><td>polarity</td><td>Positive or negative sentiment</td></tr>
+<tr><td>source</td><td>Where the review came from</td></tr>
+<tr><td>text</td><td>The review body &mdash; the only real feature we have</td></tr>
+</table>
+
+<p>Average review length <b>~806 characters</b>, minimum <b>151</b>. Worth checking before modelling:
+the minimum being 151 means <b>there are no empty or near-empty reviews</b> to clean out.</p>
+
+<h4>The preprocessing pipeline (<code>tm</code> package in R)</h4>
+<ol>
+<li><b>Tokenize</b> &mdash; break each sentence into individual words</li>
+<li><b>Lowercase</b> &mdash; so <i>Hotel</i> and <i>hotel</i> stop being two different features</li>
+<li><b>Remove stop words</b> &mdash; I, me, my, we, the, and&hellip; high frequency, near-zero signal</li>
+<li><b>Remove punctuation</b></li>
+<li><b>Stem</b> &mdash; collapse a word's variants back to its root, so every form of <i>machinery</i> becomes one feature</li>
+<li><b>Drop very rare and very frequent terms</b> &mdash; the sparsity filter</li>
+</ol>
+
+<div class="callout"><span class="c-label">A detail worth remembering</span>
+<p><b>Spelling mistakes survive as their own features</b> &mdash; a typo is just an unfamiliar token, so it
+becomes its own column. In principle that could be signal (fabricated reviews might be typed carelessly).
+In practice each individual misspelling is <b>too rare to survive the sparsity filter</b>, so it gets
+dropped before it can ever help.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="tfidf">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔢</div>
+            <div>
+              <div class="sc-tag">02 · Features</div>
+              <div class="sc-name">Bag of words, TF-IDF, and the term-document matrix</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The <b>bag-of-words</b> approach: every surviving term becomes a column, and each review gets a number
+in that column for whether &mdash; and how often &mdash; the term appears. Word order is thrown away entirely.</p>
+
+<h4>Why not raw counts</h4>
+<p>A raw count rewards words that are simply common. <b>TF-IDF</b> &mdash; <b>term frequency &times; inverse
+document frequency</b> &mdash; normalises a word's frequency <i>within a review</i> by how often it shows up
+<i>across all reviews</i>. A term that appears everywhere gets pushed toward zero; a term that is frequent in
+<i>this</i> review but rare in the corpus scores high. That is a far more informative number than the raw count.</p>
+
+<h4>Tracing the shape</h4>
+<table class="dt">
+<tr><th>Stage</th><th>Shape</th><th>Note</th></tr>
+<tr><td>Unigram TDM</td><td><b>7,372 &times; 1,600</b></td><td>7,372 distinct terms across 1,600 reviews &mdash; terms as rows</td></tr>
+<tr><td>Bigrams</td><td>built alongside</td><td>Two-word phrases as single features &mdash; <b>"customer service"</b> means something neither word means alone</td></tr>
+<tr><td>Sparsity filter</td><td>threshold <b>0.95</b></td><td>Terms missing from ~95%+ of documents get removed</td></tr>
+<tr><td>Transpose + merge</td><td><b>1,600 &times; 259</b></td><td>Unigram and bigram matrices flipped to reviews-as-rows and joined into one feature frame</td></tr>
+</table>
+
+<div class="callout amber"><span class="c-label amber">The move that matters</span>
+<p><b>7,372 terms down to 259 features.</b> Text starts out catastrophically wide &mdash; more columns than
+rows &mdash; and the sparsity threshold is what makes it modellable at all. Note also the <b>transpose</b>:
+a term-document matrix is terms &times; documents, but every model we own wants <b>rows = observations</b>.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="text-models">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🌳</div>
+            <div>
+              <div class="sc-tag">03 · Baselines</div>
+              <div class="sc-name">KNN and a decision tree &mdash; already beating humans</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>Standard <b>75% train / 25% test</b> split, then the usual suspects from Day 1.</p>
+
+<h4>KNN</h4>
+<p>Swept <b>k = 5 through 20</b>. Best result at <b>k = 20, accuracy ~60%</b> &mdash; barely better than a
+coin flip on a balanced dataset. And note <b>k = 20 was the edge of the sweep</b>, so the optimum may not
+even be inside the range tested; a larger k might do better.</p>
+
+<h4>Decision tree</h4>
+<p><b>71% accuracy.</b> The top split was the <b>TF-IDF score of "Chicago" &gt; 0.0042</b>, with subsequent
+splits on other location terms, <b>"floor"</b> and <b>"charge"</b>.</p>
+
+<div class="callout"><span class="c-label">Why "Chicago" is the first split</span>
+<p>It is a tell, not a topic. Someone who actually stayed at the hotel writes about the <b>room</b>, the
+<b>floor</b>, what they were <b>charged</b>. Someone paid to invent a review leans on what they can look up
+&mdash; the <b>city and the location</b>. The tree found the fabricator's tell on its own.</p></div>
+
+<h4>The human benchmark</h4>
+<table class="dt">
+<tr><th>Model</th><th>Accuracy</th></tr>
+<tr><td>KNN (k=20)</td><td>~60%</td></tr>
+<tr><td><b>Humans</b></td><td><b>~62%</b> &mdash; same test set</td></tr>
+<tr><td>Decision tree</td><td><b>71%</b></td></tr>
+</table>
+
+<p>A single pruned tree already <b>beats people at spotting a fake review</b>, and it does it with a rule
+you can read out loud in one sentence.</p>
+
+<div class="callout green"><span class="c-label green">Tie back to Day 2</span>
+<p>Accuracy is an honest metric <b>here</b> &mdash; and only because the dataset is <b>800/800 balanced</b>.
+The whole imbalance argument from Day 2 (94% accuracy for predicting nothing) does not bite when the base
+rate is 50%. Check the balance <i>before</i> you decide accuracy is allowed.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="randomforest">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🌲</div>
+            <div>
+              <div class="sc-tag">04 · Ensembles</div>
+              <div class="sc-name">Random forest &mdash; how it is built, and how to explain it</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>A random forest is an <b>ensemble of ~1,000 decision trees</b>. The word doing the work is <b>random</b>,
+and it enters in two separate places.</p>
+
+<h4>Where the randomness comes from</h4>
+<ul>
+<li><b>Bootstrap sample of rows</b> &mdash; each tree is trained on rows drawn <b>with replacement</b>, so
+the <b>same row can appear multiple times</b> in one tree's training set (and other rows not at all)</li>
+<li><b>Random subset of columns at each split</b> &mdash; every split only gets to consider a slice of the
+features, which both <b>speeds up computation</b> and stops every tree from grabbing the same dominant
+predictor first</li>
+</ul>
+
+<h4>Prediction</h4>
+<p><b>Majority vote across all trees.</b> And the useful part: the <b>fraction of trees voting for a class
+is the predicted probability</b>. 830 of 1,000 trees say "fake" &rarr; 0.83. That is what feeds the threshold
+tuning, ROC and lift machinery from Day 2 &mdash; a forest hands you probabilities, not just labels.</p>
+
+<p><b>Pruning is applied per tree</b> to keep individual trees from overfitting their bootstrap sample.</p>
+
+<h4>Result</h4>
+<p><b>83% accuracy</b> on this dataset &mdash; up from 71% for the single tree and ~62% for humans.</p>
+
+<h4>Feature importance by permutation</h4>
+<ol>
+<li>Take one column and <b>shuffle its values</b> at random, breaking any relationship it has with the outcome</li>
+<li>Re-score the model and <b>measure how far accuracy drops</b></li>
+<li><b>Bigger drop = more important feature.</b> Repeat one column at a time</li>
+</ol>
+<p>Run across every column, this produces the <b>top-20 most predictive words</b> plot.</p>
+
+<div class="callout"><span class="c-label">Why permutation importance is the answer for an ensemble</span>
+<p>A single tree explains itself &mdash; you read the splits. <b>A thousand trees explain nothing</b>; there
+is no single path to point at. Permutation importance sidesteps that entirely: it never looks inside the
+model, it just breaks one input and watches what happens to the output. That makes it <b>model-agnostic</b>
+&mdash; the same trick explains a forest, an XGBoost, or a neural net. This is the standard answer to
+"your best model is a black box."</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="featureselect">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎛️</div>
+            <div>
+              <div class="sc-tag">05 · Feature selection</div>
+              <div class="sc-name">Cutting features in half made KNN good and the tree shrug</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p><b>Variance-based filtering:</b> drop every feature whose variance falls below a <b>0.5</b> threshold.
+The logic is blunt &mdash; a column that barely varies carries barely any information, whatever it is measuring.</p>
+
+<p>That took the feature set from <b>259 down to 129</b>. Then:</p>
+
+<div class="anom-list">
+  <div class="anom">
+    <span class="anom-b ok">KNN</span>
+    <div class="anom-text"><strong>~60% &rarr; ~70%.</strong> A ten-point jump from deleting half the columns and changing nothing else.</div>
+  </div>
+  <div class="anom">
+    <span class="anom-b bad">Tree</span>
+    <div class="anom-text"><strong>Minimal improvement.</strong> Essentially unmoved by the same filter.</div>
+  </div>
+</div>
+
+<div class="callout amber"><span class="c-label amber">The exam-shaped point</span>
+<p>Feature selection helps <b>distance-based models</b> the most. KNN's entire notion of "near" is a
+distance computed across <b>every</b> dimension, so a useless feature does not sit quietly &mdash; it adds
+noise to every single distance calculation and actively corrupts the neighbourhoods. <b>Trees never had
+that problem</b>: a tree evaluates features one at a time and simply never splits on a useless one, so
+handing it 130 junk columns costs compute and nothing else.</p></div>
+
+<p>So the same preprocessing step is <b>transformative for KNN and irrelevant for trees</b>. If asked
+where feature selection pays, the answer is: wherever a metric is computed across all dimensions at once.</p>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="catalog3">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🏆</div>
+            <div>
+              <div class="sc-tag">06 · Contest</div>
+              <div class="sc-name">Catalog spend &mdash; what actually beat the Lasso</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The task: predict <b>customer spend</b>, a numeric target. The standing best from Day 2 was
+<b>RMSE ~102 from a Lasso</b> &mdash; which had beaten the neural net. Groups were turned loose with the
+<b>dev.board AI agent</b> to try to beat it.</p>
+
+<h4>What won</h4>
+<ul>
+<li><b>Log-transforming the spend variable.</b> Spend is heavily <b>right-skewed</b> &mdash; a long tail of
+big spenders. Taking logs pulled the RMSE down dramatically, into the <b>~40s</b>.</li>
+<li><b>A two-stage model.</b> First predict <b>who buys at all</b> (a binary problem), then predict
+<b>how much</b> among buyers only.</li>
+<li><b>Feature selection and regularisation</b> on top of both.</li>
+<li><b>5-fold cross-validation</b> for tuning.</li>
+</ul>
+
+<div class="callout amber"><span class="c-label amber">Read the RMSE honestly</span>
+<p>102 &rarr; ~40s is <b>not a clean apples-to-apples comparison</b> &mdash; once you model
+<code>log(spend)</code> you have changed the units the error is measured in, so some of that drop is the
+transformation, not the model. The <b>two-stage structure</b> is the transferable idea, and it holds up on
+its own: one model forced to explain both <i>whether</i> someone spends and <i>how much</i> is doing two
+different jobs badly. Splitting them lets each stage learn its own signal.</p></div>
+
+<div class="callout green"><span class="c-label green">The takeaway</span>
+<p><b>Look at the distribution of your outcome before you model it.</b> Skewed economic variables &mdash;
+spend, income, price, claim size &mdash; almost always want a log transform. That is a five-second histogram
+that beat an entire day of algorithm shopping.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="topics">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧵</div>
+            <div>
+              <div class="sc-tag">07 · Advanced text</div>
+              <div class="sc-name">Topic models and word embeddings &mdash; giving text a sense of meaning</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>Topic modelling (LDA)</h4>
+<p>An <b>unsupervised</b> method for pulling themes out of a corpus &mdash; no labels required. You specify
+the <b>number of topics</b> as a design choice (10, 100, whatever the use case can absorb), and the model returns:</p>
+<ul>
+<li>For each <b>document</b>: a distribution over topics &mdash; this review is 60% topic 3, 30% topic 7&hellip;</li>
+<li>For each <b>topic</b>: a set of weighted words that characterise it</li>
+</ul>
+<p>Use case from class: <b>GM call-centre logs</b> run through LDA to surface the recurring themes in
+customer complaints &mdash; nobody has to read a million transcripts to find out what people are angry about.</p>
+
+<h4>Word embeddings (Word2Vec)</h4>
+<p>Map every word to an <b>n-dimensional vector</b>, where the dimensions capture semantic properties
+&mdash; gender, tense, royalty, and so on.</p>
+<ul>
+<li>The classic demonstration: <b>King &minus; Man + Woman = Queen</b>. Vector arithmetic on meaning.</li>
+<li><b>Cosine distance</b> measures similarity &mdash; <i>cat</i> and <i>dog</i> sit close together,
+<i>apple</i> and <i>dog</i> far apart</li>
+<li>Embeddings can be built per <b>word</b>, per <b>phrase</b>, or per <b>sentence</b></li>
+</ul>
+
+<div class="callout"><span class="c-label">The limitation this fixes</span>
+<p>Bag-of-words has <b>no semantic context whatsoever</b>. Every word is just a column, which means
+<b>every word is equidistant from every other word</b> &mdash; <i>excellent</i> and <i>superb</i> are as
+unrelated to each other as <i>excellent</i> and <i>plumbing</i>. Embeddings fix this by construction, and
+context-sensitive ones go further: <b>"rock" lands near music terms in a music context and near geology
+terms in a geology context</b>. Same token, different position, because meaning depends on what surrounds it.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="llms">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🤖</div>
+            <div>
+              <div class="sc-tag">08 · LLMs</div>
+              <div class="sc-name">What is actually happening inside ChatGPT</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<h4>The core mechanism</h4>
+<p>Strip everything away and an LLM does exactly one thing: <b>predict the next token, given all the prior
+tokens</b>. That is the whole trick.</p>
+
+<p>And "token" is deliberately general &mdash; it does not have to be language:</p>
+<table class="dt">
+<tr><th>Domain</th><th>Token</th></tr>
+<tr><td>Text</td><td>A word or word-piece</td></tr>
+<tr><td>Images</td><td>A pixel</td></tr>
+<tr><td>Audio</td><td>A sound wave segment</td></tr>
+<tr><td>Video</td><td>A frame</td></tr>
+</table>
+<p>Same next-token machinery, different alphabet. That is why one architecture spread across every modality.</p>
+
+<h4>Why it hallucinates</h4>
+<p>The model is <b>non-deterministic</b>. At each step several tokens can carry near-equal probability, and
+<b>one is picked at random</b> from that distribution. That sampling step is the <b>mechanical source of
+hallucination</b> &mdash; a low-probability or equally-probable wrong continuation gets selected, the model
+commits to it, and everything after that is conditioned on the mistake.</p>
+
+<div class="callout amber"><span class="c-label amber">Worth saying out loud</span>
+<p>Hallucination is not a bug that was left in. It is the <b>same randomness that makes the output fluent
+and varied</b> instead of robotic. You cannot remove one without the other &mdash; you can only constrain it
+(grounding, retrieval, lower sampling temperature).</p></div>
+
+<h4>Why ChatGPT and not BERT</h4>
+<p><b>LLMs existed for years before ChatGPT</b> &mdash; BERT was around ~2018. The models were not the
+breakthrough.</p>
+<p><b>OpenAI's actual innovation was fine-tuning with RLHF</b> &mdash; reinforcement learning with human
+feedback:</p>
+<ol>
+<li>Humans wrote prompts</li>
+<li>Humans <b>ranked</b> the model's candidate responses against each other</li>
+<li>Those rankings trained a <b>reward model</b>, which then trained the LLM to produce answers people prefer</li>
+</ol>
+<p>The cost of that human labour was roughly <b>$1 billion</b>, funded through Microsoft. The moat was
+never the architecture &mdash; it was <b>who could afford the human raters</b>.</p>
+
+<h4>How that moat closed</h4>
+<p><b>DeepSeek and later models use existing LLMs as synthetic raters</b> instead of people &mdash;
+<b>RLAIF</b>, reinforcement learning from AI feedback. It collapses the cost of the single most expensive
+ingredient, which is a large part of why capable models stopped being the property of one lab.</p>
+
+</div></div>
+      </div>
+
+      <div class="divider">Reference</div>
+
+      <div class="sc bl-green" id="hooks3">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">⭐</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Day 3 exam hooks &mdash; the twelve things worth memorising</div>
+            </div>
+          </div>
+          <span class="chevron">▼</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<ol>
+<li><b>TF-IDF beats raw counts</b> because it normalises a term's frequency in a document by its frequency across the corpus &mdash; common-everywhere words get crushed, distinctive ones score high.</li>
+<li><b>Accuracy is only honest on a balanced set.</b> It was allowed here because the data is 800 fake / 800 genuine. Check the base rate before you quote it.</li>
+<li><b>The scoreboard, in order: KNN ~60% &rarr; humans ~62% &rarr; tree 71% &rarr; random forest 83%.</b> A single readable tree already beats people.</li>
+<li><b>Top split was TF-IDF of "Chicago" &gt; 0.0042.</b> Fabricators write about the city; real guests write about the floor and the charge.</li>
+<li><b>7,372 unigrams &rarr; 259 features &rarr; 129 after variance filtering.</b> Text is catastrophically wide; the sparsity threshold (0.95) is what makes it modellable.</li>
+<li><b>Bootstrap = rows sampled with replacement</b> (a row can repeat) <b>+ a random column subset at each split.</b> The column subsetting also speeds up computation.</li>
+<li><b>Diversity is what makes the ensemble work.</b> Identical trees vote identically and buy you nothing &mdash; the two sources of randomness exist to force disagreement.</li>
+<li><b>The vote share <i>is</i> the probability.</b> 830 of 1,000 trees &rarr; 0.83, which is what feeds threshold tuning, ROC and lift.</li>
+<li><b>Permutation importance is how you explain a forest:</b> shuffle one column, measure the accuracy drop, bigger drop = more important. Model-agnostic, works on any black box.</li>
+<li><b>Variance filtering rescued KNN (~60% &rarr; ~70%) and did nothing for the tree.</b> Irrelevant features corrupt <i>distance</i>, which is KNN's whole world; trees just never split on them.</li>
+<li><b>Log-transform a right-skewed target</b> (spend, income, price), and <b>decompose the problem</b> &mdash; two-stage "who buys" then "how much" beats one model doing both jobs.</li>
+<li><b>Bag of words has no semantics &mdash; every word is equidistant.</b> Embeddings fix that; LDA finds themes unsupervised. <b>LLMs are next-token predictors, and random sampling among near-equal tokens is why they hallucinate.</b> <b>RLHF was the ChatGPT unlock (~$1B of human ranking); RLAIF made it cheap.</b></li>
+</ol>
+
+<div class="callout green"><span class="c-label green">The one-line summary of Day 3</span>
+<p><b>Once text is a feature matrix, it is just Day 1 and Day 2 again.</b> Nothing on the modelling side was
+new &mdash; KNN, trees, forests, RMSE. What moved the numbers was <b>judgement applied before the
+algorithm</b>: which features to keep, whether to transform the target, and whether the question is
+really one problem or two. <i>The algorithm was never the bottleneck.</i></p></div>
 
 </div></div>
       </div>
