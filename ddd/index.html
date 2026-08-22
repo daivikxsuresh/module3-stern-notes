@@ -226,8 +226,22 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: 
     <a href="#iv"><span class="dot"></span>Instrumental Variables</a>
     <a href="#iv-cases"><span class="dot"></span>The IV Zoo</a>
   </div>
+  <div class="sb-group">Day 5 — Fri Aug 21</div>
+  <div class="sb-nav">
+    <a href="#d5-debrief"><span class="dot"></span>Exercise Debrief</a>
+    <a href="#d5-yours"><span class="dot"></span>Your Run — the Numbers</a>
+    <a href="#d5-iv-test"><span class="dot"></span>IV as a Test</a>
+    <a href="#d5-specs"><span class="dot"></span>The Specification Trap</a>
+    <a href="#d5-tips"><span class="dot"></span>IV Reporting Checklist</a>
+    <a href="#d5-zoo"><span class="dot"></span>The IV Zoo, cont.</a>
+    <a href="#d5-fe"><span class="dot"></span>Fixed Effects</a>
+    <a href="#d5-speaker"><span class="dot"></span>Kathleen Hayes</a>
+    <a href="#d5-gap"><span class="dot"></span>Not Captured — Afternoon</a>
+  </div>
   <div class="sb-group">Reference</div>
   <div class="sb-nav">
+    <a href="#d5-map"><span class="dot"></span>Which Method, When</a>
+    <a href="#d5-hooks"><span class="dot"></span>Exam Hooks — Day 5</a>
     <a href="#hooks"><span class="dot"></span>Exam Hooks — Day 4</a>
   </div>
 </nav>
@@ -236,9 +250,10 @@ code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: 
   <div id="hdr">
     <div class="hdr-eyebrow">NYU Stern · MSBAi · Module 3 · Data Driven Decision Making</div>
     <h1 class="hdr-title">Data Driven <span>Decision Making</span></h1>
-    <p class="hdr-sub">Prof. Rob Seamans · counterfactuals · Project STAR · propensity score matching · Heckman selection · instrumental variables</p>
+    <p class="hdr-sub">Prof. Rob Seamans · counterfactuals · Project STAR · matching · Heckman selection · instrumental variables · fixed effects · specification robustness</p>
     <div class="day-tabs">
       <button class="day-tab active" data-panel="day4">Day 4 — Thu Aug 20</button>
+      <button class="day-tab" data-panel="day5">Day 5 &mdash; Fri Aug 21</button>
       <button class="day-tab" data-panel="assignments">Assignments</button>
     </div>
   </div>
@@ -276,7 +291,7 @@ five different ways: <i>where does a credible counterfactual come from when you 
 <ul>
 <li>Fixed effects, if they didn't get covered today</li>
 <li>Debrief of today's in-class exercise</li>
-<li><b>Alumni speaker · Kathleen Hayes, 10–10:30am</b> — graduated roughly three years ago, out of the professor's own capstone group. <i>(Where she works now came through garbled in the recording — don't quote an employer.)</i></li>
+<li><b>Alumni speaker · Kathleen Hayes, 10–10:30am</b> — graduated roughly three years ago, out of the professor's own capstone group. <i>(Resolved on Day 5: <b>Anthropic</b> — she built the finance analytics team there. Previously YouTube, Google ×2, Blue Bottle, Instagram.)</i></li>
 <li>Natural experiments and difference-in-differences</li>
 <li>Regression discontinuity, randomized field experiments, LLMs</li>
 <li>Wrap-up, plus extra topics if there's room</li>
@@ -1007,6 +1022,467 @@ made it into the sample, and IV borrows randomness from somewhere else. Pick by 
 </div></div>
       </div>
     </div>
+
+    <div id="panel-day5" class="day-panel">
+      <div class="divider">The exercise debrief &mdash; what the room actually found</div>
+
+      <div class="sc bl-accent" id="d5-debrief">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🗞️</div>
+            <div>
+              <div class="sc-tag">01 · Debrief</div>
+              <div class="sc-name">Newspaper readability &amp; internet access &mdash; the room's verdict</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The task: does internet access <b>causally</b> affect newspaper readability? Year 2000 county data, with
+<b>lightning strikes</b> as the instrument for ISP count.</p>
+
+<h4>What every group saw</h4>
+<ul>
+<li><b>Naive regression:</b> ISP positive and statistically significant across all groups</li>
+<li><b>After instrumenting:</b> significance disappears in most years</li>
+<li><b>Group 1</b> ran 2000, 2004 and 2008 &mdash; ISP insignificant after IV in all three</li>
+<li><b>Group 2</b> ran year-by-year &mdash; 2007 came back borderline, but with a very low coefficient</li>
+</ul>
+
+<div class="callout"><span class="c-label">The room's conclusion</span>
+<p><b>No robust evidence of a causal relationship</b> between internet access and newspaper readability. The
+positive correlation you get from OLS is confounded &mdash; ISPs built out where population and income already
+were, and those are the same counties whose papers already differed.</p></div>
+
+<p>The deeper point Seamans was driving at: <b>the same toolkit that establishes causality also establishes its
+absence.</b> A null from a well-identified IV is a result, not a failed experiment.</p>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="d5-yours">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔬</div>
+            <div>
+              <div class="sc-tag">02 · Your run</div>
+              <div class="sc-name">Your own numbers say something sharper than the room did</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>You ran this in full on Aug 20 &mdash; R and Stata, all nine years. Your results agree with the room's
+conclusion but for a <b>different and more defensible reason</b>, and it's worth knowing which one you'd
+defend if asked.</p>
+
+<h4>Year 2000, n = 1,833</h4>
+<table class="dt">
+<tr><th>Model</th><th>Coefficient</th><th>p</th><th>Read</th></tr>
+<tr><td>OLS, no controls</td><td>0.0139</td><td>&lt; 0.001</td><td>Strong, and mostly confounded</td></tr>
+<tr><td>OLS + controls</td><td>0.0079</td><td>0.004</td><td><b>Halves</b> once population and income go in</td></tr>
+<tr><td>IV: lightning</td><td>0.0542</td><td>0.028</td><td>Significant &mdash; and <b>first-stage F = 12.5</b></td></tr>
+<tr><td>IV: log(lightning)</td><td>0.0531</td><td>&lt; 0.001</td><td>Holds under the log spec too</td></tr>
+</table>
+
+<div class="callout sky"><span class="c-label">The thing to notice</span>
+<p>Your year-2000 IV is <b>significant with a strong first stage (F = 12.5, clears the F &gt; 10 bar)</b>.
+Group 1 reported 2000 as insignificant. Same data, different specification &mdash; which is exactly the
+specification-sensitivity lesson, showing up live in your own room.</p></div>
+
+<h4>Why the other years die &mdash; and it isn't &ldquo;no effect&rdquo;</h4>
+<p>Look at the first-stage F across all nine years:</p>
+<table class="dt">
+<tr><th>Year</th><th>First-stage F</th><th>IV verdict</th></tr>
+<tr><td><b>2000</b></td><td><b>12.48</b></td><td>Strong instrument &mdash; the estimate means something</td></tr>
+<tr><td><b>2007</b></td><td><b>8.26</b></td><td>Borderline &mdash; below 10, treat with caution</td></tr>
+<tr><td>2006</td><td>1.17</td><td>Dead</td></tr>
+<tr><td>2001–2005, 2008</td><td>0.003 &ndash; 0.31</td><td>Dead &mdash; no first stage at all</td></tr>
+</table>
+
+<p>In seven of nine years <b>the instrument has no first stage</b>. The IV coefficients in those years aren't
+evidence of no effect &mdash; they're <b>noise</b>. 2003 returns an IV estimate of 1.376 with a standard error
+of <b>34.0</b>. That number is not a finding; it's a division by approximately zero.</p>
+
+<div class="callout"><span class="c-label">The honest framing, and it's stronger</span>
+<p>Not: <i>&ldquo;IV shows internet access doesn't affect readability.&rdquo;</i><br>
+But: <b>&ldquo;The instrument is only credible in 2000, where the effect is positive and significant. After
+2000 lightning stops predicting ISP entry, so those years carry no information either way.&rdquo;</b></p>
+<p>Plausible mechanism: lightning proxied for something about early dial-up buildout economics. Once broadband
+matured, the channel closed. <b>An instrument can expire.</b></p></div>
+
+<h4>Bonus: your OLS sign flips across the decade</h4>
+<p>2000 OLS is <b>+0.0079</b> (p = 0.004). By 2005&ndash;2008 it's consistently <b>negative and significant</b>
+(&minus;0.0028, &minus;0.0046, &minus;0.0027, &minus;0.0023, all p &lt; 0.01). That's the naive correlation
+reversing sign over nine years &mdash; a live example of scenario two below.</p>
+
+</div></div>
+      </div>
+      <div class="divider">What IV is actually for</div>
+
+      <div class="sc bl-accent" id="d5-iv-test">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧪</div>
+            <div>
+              <div class="sc-tag">03 · Framing</div>
+              <div class="sc-name">IV is a test of causality, not a repair kit</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The single reframe from today: you don't reach for IV only when you already believe there's an effect. You
+reach for it to <b>find out whether a correlation is causal at all</b>. Three things can happen:</p>
+
+<table class="dt">
+<tr><th>Scenario</th><th>What it means</th></tr>
+<tr><td><b>Correlation vanishes</b></td><td>The OLS relationship was confounding. Today's exercise, most years.</td></tr>
+<tr><td><b>Sign flips</b></td><td>The apparent positive is actually <b>negative</b> once unobservables come out. The most counterintuitive and most publishable outcome.</td></tr>
+<tr><td><b>Hidden effect surfaces</b></td><td>No visible correlation in the raw data, but IV reveals a real causal relationship that was being masked.</td></tr>
+</table>
+
+<div class="callout green"><span class="c-label green">Carry this into the post-module project</span>
+<p>&ldquo;We instrumented and found nothing&rdquo; is a legitimate result <b>if and only if</b> your first stage
+is strong. Otherwise you haven't found nothing &mdash; you've found out that your instrument doesn't work.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="d5-specs">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">⚖️</div>
+            <div>
+              <div class="sc-tag">04 · The trap</div>
+              <div class="sc-name">Borderline significance &mdash; and the trap he set on purpose</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<div class="callout"><span class="c-label">He designed this deliberately</span>
+<p>The exercise was <b>built to land at p &asymp; 0.1</b> in the IV stage. Then he watched what the room did
+with it.</p></div>
+
+<p>Some groups swapped <b>log population</b> in for population and nudged the p-value toward 0.05. That's not
+cheating &mdash; log population is a defensible spec. The problem is <b>reporting only that one</b>.</p>
+
+<h4>His stated standard</h4>
+<ul>
+<li><b>Significance under one cherry-picked specification is not a robust finding</b></li>
+<li>Run <b>multiple</b> specifications</li>
+<li>Report <b>all</b> of them, transparently</li>
+<li>Present a <b>table</b>: one column for what parameter varies, one for the result</li>
+<li>Say the honest sentence out loud: <i>&ldquo;significant under one or two specs, not under most&rdquo;</i></li>
+</ul>
+
+<div class="callout sky"><span class="c-label">Read this as rubric, not anecdote</span>
+<p>He built a trap, sprang it, and then told the room exactly what he wanted instead &mdash; two days before the
+40% group project brief drops. <b>Specification robustness is going to be graded.</b> Build the spec table into
+the deliverable from the start rather than bolting it on at the end.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="d5-tips">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔧</div>
+            <div>
+              <div class="sc-tag">05 · Practice</div>
+              <div class="sc-name">IV reporting checklist</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<ul>
+<li><b>Always report the first stage.</b> Not optional, not an appendix item.</li>
+<li><b>Report the F-statistic.</b> Rule of thumb: <b>F &gt; 10 = strong instrument.</b> Below that, your second
+stage is unreliable no matter how pretty the p-value looks.</li>
+<li><b>More than one instrument &rarr; additional tests required.</b> Overidentification tests; details are in
+the course files.</li>
+<li><b>Capstone groups using multiple instruments: he offered Zoom support.</b> That's a free office hour with
+the person grading you &mdash; take it if your group goes multi-instrument.</li>
+</ul>
+
+<div class="callout"><span class="c-label">Why F &gt; 10 and not F &gt; 4</span>
+<p>The usual significance bar would be F &asymp; 4. The higher bar exists because weak instruments make IV
+<b>biased toward OLS</b> and blow up standard errors simultaneously &mdash; you get a confidently wrong answer
+rather than an obviously broken one. Your 2003 estimate (SE = 34.0) is the obviously-broken version; the
+dangerous case is F = 6 with a tight-looking interval.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="d5-zoo">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🦓</div>
+            <div>
+              <div class="sc-tag">06 · Examples</div>
+              <div class="sc-name">The IV zoo, continued</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<table class="dt">
+<tr><th>Paper</th><th>Instrument</th><th>The trick</th></tr>
+<tr><td>Internet &amp; hate crimes</td><td><b>Geographic slope</b></td><td>Steeper terrain &rarr; slower broadband rollout. In a panel you need <b>slope &times; year</b>, not slope alone &mdash; slope doesn't vary over time, so it's absorbed by county fixed effects.</td></tr>
+<tr><td>Hoxby &mdash; school competition</td><td><b>River locations</b></td><td>Rivers created natural district boundaries that are hard to redraw. Geography that predates the outcome.</td></tr>
+<tr><td>Samila &amp; Sorenson &mdash; VC &amp; entrepreneurship</td><td><b>LP portfolio rebalancing</b></td><td>Strong stock-market years trigger rebalancing, which pushes more capital into VC the following year &mdash; for reasons unrelated to local startup quality.</td></tr>
+</table>
+
+<div class="callout sky"><span class="c-label">Two things to verify before you cite these</span>
+<p><b>1.</b> The hate-crimes paper came through your notes as &ldquo;Agan and Sorensen.&rdquo; The well-known
+terrain-instrument paper on that topic is <b>Chan, Ghose &amp; Seamans</b> &mdash; i.e. your own professor's
+work. Check the slide before it lands in a deck.</p>
+<p><b>2.</b> Hoxby's rivers paper was famously challenged by <b>Rothstein</b>, who found the results didn't
+survive alternative codings of the stream data. Same lesson as this morning's exercise, playing out in a
+top-five journal &mdash; and a good line to have ready if he asks whether IV settles anything.</p></div>
+
+<p><b>The pattern across all three:</b> the instrument is something <b>physical or institutional</b> that
+shifts your X for reasons that have nothing to do with your Y. Terrain, rivers, and someone else's portfolio
+math. Nobody chose them with your outcome in mind &mdash; which is the whole argument.</p>
+
+</div></div>
+      </div>
+      <div class="divider">Fixed effects and panel data</div>
+
+      <div class="sc bl-accent" id="d5-fe">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧱</div>
+            <div>
+              <div class="sc-tag">07 · Method</div>
+              <div class="sc-name">Fixed effects &mdash; the three buckets</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p><b>Panel data:</b> the same unit observed across multiple time periods. That structure buys you something
+cross-sections can't offer.</p>
+
+<h4>Break unobserved factors into three buckets</h4>
+<table class="dt">
+<tr><th>Bucket</th><th>Example</th><th>Fixed by</th></tr>
+<tr><td>Varies only at the <b>unit</b> level</td><td>A county's culture, geography, baseline institutions</td><td><b>Unit fixed effects</b> &mdash; entirely</td></tr>
+<tr><td>Varies only at the <b>time</b> level</td><td>A recession, a federal law, a national tech shock</td><td><b>Time fixed effects</b> &mdash; entirely</td></tr>
+<tr><td>Varies at <b>both simultaneously</b></td><td>A county-specific policy change in one year</td><td><b>Nothing</b> &mdash; this is what's left</td></tr>
+</table>
+
+<div class="callout"><span class="c-label">The whole logic of the module in one line</span>
+<p><b>Two-way fixed effects clean out buckets one and two entirely. Bucket three is the reason IV,
+diff-in-diff and RDD still exist.</b> If you can argue your confounder is time-invariant, FE is enough. If it
+moves with the unit over time, you need an identification strategy on top.</p></div>
+
+<h4>In Stata</h4>
+<p>What he showed:</p>
+<div class="callout"><span class="c-label">Collinearity note</span>
+<p>Stata <b>drops one category</b> (country 1, quarter 1) to avoid collinearity with the constant. Every
+coefficient is therefore read <b>relative to the dropped group</b> &mdash; not in absolute terms. Misreading this
+is one of the most common errors in a panel write-up.</p></div>
+
+<table class="dt">
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>xi: regress y x i.country</code></td><td>What he demonstrated. The <code>xi:</code> prefix is <b>pre-Stata-11 syntax</b> &mdash; modern factor-variable notation drops it: just <code>regress y x i.country</code>.</td></tr>
+<tr><td><code>areg y x, absorb(country)</code></td><td>Absorbs fixed effects without estimating each coefficient. Much faster on large datasets. <b>Absorbs one dimension only.</b></td></tr>
+<tr><td><code>areg y x i.year, absorb(country)</code></td><td>Two-way FE the built-in way &mdash; unit absorbed, year as dummies.</td></tr>
+<tr><td><code>reghdfe y x, absorb(country year)</code></td><td><b>The current standard</b> for two-way / high-dimensional FE. Needs <code>ssc install reghdfe</code>. Use this for the project.</td></tr>
+</table>
+
+</div></div>
+      </div>
+      <div class="divider">The room</div>
+
+      <div class="sc bl-accent" id="d5-speaker">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎤</div>
+            <div>
+              <div class="sc-tag">08 · Guest</div>
+              <div class="sc-name">Kathleen Hayes &mdash; alumni speaker</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>Roughly 20 years across finance, strategy, data engineering and data science.</p>
+
+<h4>The path</h4>
+<ul>
+<li><b>Early YouTube</b> &mdash; when it was ~500 employees</li>
+<li><b>Two separate stints at Google</b> &mdash; latterly data science lead for Search</li>
+<li><b>Blue Bottle Coffee</b> &mdash; Head of Data and e-commerce</li>
+<li><b>Instagram</b> &mdash; data engineering</li>
+<li><b>Most recently Anthropic</b> &mdash; built the finance analytics team covering revenue forecasting,
+competitive intelligence and product launch support</li>
+<li>Now <b>adjunct faculty at NYU SPS</b></li>
+</ul>
+
+<div class="callout sky"><span class="c-label">Resolves a Day 4 gap</span>
+<p>Day 4's note flagged that her employer came through garbled in the recording. It's <b>Anthropic</b>
+&mdash; finance analytics. That's the answer.</p></div>
+
+<h4>On the program</h4>
+<ul>
+<li>Joined during her <b>second Google stint</b>; <b>causal inference was a deliberate gap</b> she wanted to
+close &mdash; not a credential grab</li>
+<li>Her Abu Dhabi module landed at the <b>early LLM inflection point</b></li>
+<li>Applied causal inference directly in her roles, and used it to <b>shape hiring</b> at Anthropic</li>
+</ul>
+
+<h4>On the cohort</h4>
+<ul>
+<li><b>Three or four of her closest friends</b> came out of the program</li>
+<li>Still actively messages cohort members with data science questions &mdash; <b>&ldquo;no shame in asking&rdquo;</b></li>
+<li>Connected with alumni from <b>adjacent cohorts</b>, not just her own</li>
+</ul>
+
+<div class="callout"><span class="c-label">The transferable bit</span>
+<p>She went back to school mid-career to close <b>one specific technical gap</b>, then used that gap-closing as
+a hiring lens once she was senior. That's a cleaner story than &ldquo;got the degree, got promoted&rdquo; &mdash;
+and it's the same shape as picking up causal inference to argue vendor performance rather than just report it.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-accent" id="d5-gap">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🕳️</div>
+            <div>
+              <div class="sc-tag">09 · Gap</div>
+              <div class="sc-name">Not captured &mdash; the afternoon</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<div class="callout"><span class="c-label">Honest gap in these notes</span>
+<p>The afternoon agenda ran: <b>natural experiments and difference-in-differences</b> after the first break,
+then <b>regression discontinuity 1:30&ndash;3:30pm</b> (the longest segment of the day), then <b>randomized
+field experiments and LLMs in causal inference</b>, then wrap-up.</p>
+<p><b>None of that is in these notes.</b> Everything below is the standard treatment, reconstructed &mdash;
+<b>not</b> what Seamans said. Verify against the slides and the annotated do-file before relying on it.</p></div>
+
+<h4>Difference-in-differences &mdash; the shape</h4>
+<ul>
+<li>Needs a <b>treatment that hits some units at a known time</b>, plus units it didn't hit</li>
+<li>Compares the <b>change</b> in treated units to the <b>change</b> in controls &mdash; differencing out both
+fixed unit gaps and common time shocks</li>
+<li><b>Core assumption: parallel trends.</b> Absent treatment, both groups would have moved together. Untestable
+after treatment; you support it by showing pre-treatment trends track</li>
+<li>The standard visual is the <b>event-study plot</b> &mdash; coefficients by period relative to treatment, flat
+before, jumping after</li>
+</ul>
+
+<h4>Regression discontinuity &mdash; the shape</h4>
+<ul>
+<li>Needs a <b>running variable with a sharp cutoff</b> that determines treatment (test score &ge; 60, population
+&ge; 5,000, vote share &ge; 50%)</li>
+<li>Units just below and just above the cutoff are <b>as good as randomly assigned</b></li>
+<li><b>Estimates a local effect</b> &mdash; valid near the cutoff, and you cannot extrapolate far from it</li>
+<li>Breaks when <b>units can manipulate their position</b>. The standard check is the <b>McCrary density test</b>
+&mdash; look for bunching just past the threshold</li>
+<li><b>Sharp</b> RDD = crossing the cutoff fully determines treatment. <b>Fuzzy</b> RDD = crossing only changes the
+probability, and you instrument treatment with the cutoff indicator &mdash; which is IV again</li>
+</ul>
+
+<div class="callout sky"><span class="c-label">To fill this in</span>
+<p>Grab the <b>annotated do-file</b> he saves at end of day, plus the afternoon slides from Brightspace. Send them
+over and this section gets rebuilt from what he actually taught.</p></div>
+
+</div></div>
+      </div>
+      <div class="divider">Reference</div>
+
+      <div class="sc bl-accent" id="d5-map">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🗺️</div>
+            <div>
+              <div class="sc-tag">Reference</div>
+              <div class="sc-name">Which method, when &mdash; the selection map</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<p>The module teaches these one at a time. The selection logic is the part that never appears in a single
+lecture, and it's what a project defence actually turns on.</p>
+
+<table class="dt">
+<tr><th>You have&hellip;</th><th>Use</th><th>Key assumption</th><th>Fails when</th></tr>
+<tr><td>A sharp cutoff on a running variable</td><td><b>RDD</b></td><td>Nothing else jumps at the cutoff</td><td>Units can manipulate their position</td></tr>
+<tr><td>A shock hitting some units at a known date, plus untreated comparisons</td><td><b>DiD</b></td><td>Parallel trends pre-treatment</td><td>Treatment timing correlates with trajectory</td></tr>
+<tr><td>Panel data, worried only about <b>time-invariant</b> confounders</td><td><b>Fixed effects</b></td><td>Confounders don't vary within unit over time</td><td>Confounder varies at unit &times; time</td></tr>
+<tr><td>An external shifter of X that touches Y only through X</td><td><b>IV</b></td><td>Exclusion restriction &mdash; argued, never tested</td><td>Weak first stage, or Z affects Y directly</td></tr>
+<tr><td>Rich observables and a plausible ignorability story</td><td><b>Matching / PSM</b></td><td>Selection on observables only</td><td>Unobservables drive selection</td></tr>
+<tr><td>Non-random selection <i>into the sample</i></td><td><b>Heckman</b></td><td>A valid exclusion in the selection equation</td><td>Same instrument problem, one level up</td></tr>
+</table>
+
+<div class="callout green"><span class="c-label green">The defence question</span>
+<p>Seamans said it on Day 4 and it holds for the whole module: <b>nothing plays the role R&sup2; plays.</b> No
+diagnostic picks your method for you. You pick the counterfactual you can <b>defend</b>, then show it survives
+more than one specification.</p></div>
+
+</div></div>
+      </div>
+
+      <div class="sc bl-green" id="d5-hooks">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">⭐</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Day 5 exam hooks &mdash; the things worth memorising</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in">
+
+<ol>
+<li><b>Naive regression cannot establish causality.</b> IV tests whether a correlation <i>is</i> causal &mdash; it isn't only a fix applied once you've decided it is.</li>
+<li><b>IV has three possible outcomes:</b> the correlation vanishes, the <b>sign flips</b>, or a hidden effect surfaces where the raw data showed nothing.</li>
+<li><b>The same tools show absence of causality, not just presence.</b> A clean null is a result.</li>
+<li><b>Always report the first stage, and always report F.</b> <b>F &gt; 10 = strong instrument.</b></li>
+<li><b>A weak instrument doesn't give you a null &mdash; it gives you noise.</b> An IV coefficient of 1.38 with a standard error of 34 is a division by nearly zero, not evidence of no effect.</li>
+<li><b>An instrument can expire.</b> Lightning predicts ISP entry in 2000 (F = 12.5) and nowhere afterwards. Relevance is a property of the period, not the variable.</li>
+<li><b>Significance under one cherry-picked specification is not a finding.</b> Run several, report all, put them in a table with what varies and what results.</li>
+<li><b>&ldquo;Significant under one or two specs, not under most&rdquo;</b> is the honest sentence. Say it rather than hide it.</li>
+<li><b>More than one instrument requires additional tests</b> (overidentification). He offered Zoom support for groups that go there.</li>
+<li><b>In a panel, a time-invariant instrument needs a time interaction</b> &mdash; slope &times; year, not slope. Otherwise the unit fixed effects absorb it entirely.</li>
+<li><b>Unobservables split three ways:</b> unit-only, time-only, and unit &times; time. Two-way fixed effects kill the first two completely. <b>The third is the entire reason the rest of the toolkit exists.</b></li>
+<li><b>Stata drops one category</b> to avoid collinearity with the constant &mdash; every FE coefficient reads <b>relative to the dropped group</b>.</li>
+<li><b><code>areg</code> absorbs one dimension.</b> For unit <i>and</i> time, use <code>areg y x i.year, absorb(unit)</code> or <code>reghdfe y x, absorb(unit year)</code>.</li>
+<li><b>Good instruments are physical or institutional:</b> terrain, rivers, someone else's portfolio rebalancing. Nobody picked them with your outcome in mind &mdash; that <i>is</i> the exclusion argument.</li>
+<li><b>Hoxby was challenged by Rothstein</b> over alternative codings of the river data. Even canonical IV papers lose on robustness.</li>
+</ol>
+
+<div class="callout green"><span class="c-label green">The one-line summary of Day 5</span>
+<p>Day 4 asked <i>where does a credible counterfactual come from?</i> <b>Day 5 asks whether yours survives
+contact with a second specification.</b> The instrument has to be strong (F &gt; 10), the strength has to hold in
+the period you're studying, and the result has to appear under more than the one spec that flattered it.</p></div>
+
+</div></div>
+      </div>
+
+    </div>
     <div id="panel-assignments" class="day-panel">
       <div class="divider">Data Driven Decision Making — graded components</div>
 
@@ -1035,8 +1511,8 @@ made it into the sample, and IV borrows randomness from somewhere else. Pick by 
         <div class="ac-b">
           <div class="ac-label">Post-module · 40%</div>
           <div class="ac-title">Group project</div>
-          <div class="ac-desc">Details forthcoming — the <b>brief posts to Brightspace by end of day Friday Aug 21</b>. This is the only group deliverable left in Module 3.</div>
-          <div class="ac-due">Window <span>Aug 23 – Sep 27</span></div>
+          <div class="ac-desc">The <b>brief posts to Brightspace end of day Fri Aug 21</b> — today. This is the <b>only group deliverable left in Module 3</b>.<br><br><b>What Day 5 revealed about how it gets graded:</b> Seamans built the in-class exercise to land at p ≈ 0.1, watched groups cherry-pick a specification to cross 0.05, then stated the standard — <b>run multiple specifications, report all of them, present a table of what varies against what results</b>. Build that table in from the start rather than bolting it on. He also offered <b>Zoom support for groups using more than one instrument</b> (overidentification tests required).<br><br><b>Settle early: who presses submit, and when.</b></div>
+          <div class="ac-due">Window <span>Aug 23 – Sep 27</span> · brief lands <span>today</span></div>
         </div>
       </div>
 
@@ -1044,15 +1520,15 @@ made it into the sample, and IV borrows randomness from somewhere else. Pick by 
       <p>Standing rule after DDD A2 went in late: on a group deliverable, settle <b>who presses submit and
       when</b> — not just whether your part is done. Get the name and the time on the record early.</p></div>
 
-      <div class="divider">Before the exercise</div>
+      <div class="divider">Files to collect</div>
 
       <div class="assign-card">
         <div class="ac-ico">🖥️</div>
         <div class="ac-b">
           <div class="ac-label">Next steps</div>
-          <div class="ac-title">Stata setup</div>
-          <div class="ac-desc">Open the <b>Stata do-file</b> from Brightspace (MSBA 2026 folder) <b>before</b> the in-class exercise, and check the working directory and data download — Sanchez is helping with setup during the break. The professor saves an <b>annotated version of the do-file at the end of the day</b>; grab that one too. At least one laptop with Stata per group.</div>
-          <div class="ac-due">Also: <span>group project brief</span> lands on Brightspace end of Fri Aug 21</div>
+          <div class="ac-title">Grab the annotated do-file</div>
+          <div class="ac-desc">Exercise is done. Two things still worth pulling from Brightspace (MSBA 2026 folder): the <b>annotated do-file</b> Seamans saves at end of day, and the <b>afternoon slides</b> — difference-in-differences, regression discontinuity, and the LLM segment, none of which made it into the Day 5 notes. The <b>multiple-instrument tests</b> he referenced are in the course files too.</div>
+          <div class="ac-due">Fills the <span>Not Captured</span> gap on the Day 5 page</div>
         </div>
       </div>
 
