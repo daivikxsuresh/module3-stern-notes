@@ -1,30 +1,1546 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Foundations of AI Agents · Module 3 · NYU Stern MSBAi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Lora&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{background:#0d0a0c;color:#f2ede6;font-family:'Lora',Georgia,serif;min-height:100vh;
-display:flex;align-items:center;justify-content:center;padding:32px;text-align:center}
-.box{max-width:460px}
-.badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;
-text-transform:uppercase;color:#22d3ee;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.25);
-border-radius:5px;padding:4px 10px;margin-bottom:20px}
-h1{font-family:'DM Serif Display',serif;font-size:36px;line-height:1.15;margin-bottom:12px}
-h1 span{color:#22d3ee}
-p{color:#a97f8c;font-size:15.5px;line-height:1.7;margin-bottom:8px}
-.when{font-family:'JetBrains Mono',monospace;font-size:12px;color:#22d3ee;margin:22px 0 30px}
-a{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11.5px;letter-spacing:.06em;
-color:#a97f8c;text-decoration:none;border:1px solid #2e1a21;border-radius:7px;padding:10px 18px;
-transition:color .15s,border-color .15s}
-a:hover{color:#f2ede6;border-color:#22d3ee}
-</style></head><body>
-<div class="box">
-  <div class="badge">AI Agents · Module 3</div>
-  <h1>Foundations of <span>AI Agents</span></h1>
-  <p>Prof. Ilan Lobel · n8n, Lovable, hands-on lab</p>
-  <p>Notes go up the evening of each session, same format as the Machine Learning page.</p>
-  <div class="when">Saturday · Aug 22</div>
-  <a href="../">← Module 3 hub</a>
-</div></body></html>
+:root {
+  --bg:      #060d0f;
+  --surface: #0e1518;
+  --card:    #121a1d;
+  --border:  #1a3138;
+  --accent:  #22d3ee;
+  --accent-soft: rgba(34,211,238,.08);
+  --amber:     #fbbf24;
+  --green:   #34d399;
+  --red:     #f87171;
+  --text:    #f2ede6;
+  --muted:   #7f9ea9;
+  --faint:   #1f434c;
+  --sidebar-w: 256px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Lora', Georgia, serif;
+  font-size: 16px; line-height: 1.75;
+  display: flex; min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image: radial-gradient(circle, rgba(34,211,238,.04) 1px, transparent 1px);
+  background-size: 28px 28px; pointer-events: none; z-index: 0;
+}
+body::after {
+  content: ''; position: fixed; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 400px;
+  background: radial-gradient(ellipse, rgba(34,211,238,.07) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+/* ── GATE ── */
+#gate { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.gate-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 44px; max-width: 360px; width: 90%; text-align: center; }
+.gate-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+.gate-title { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); margin-bottom: 24px; }
+.gate-input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: .08em; outline: none; text-align: center; transition: border-color .2s; }
+.gate-input:focus { border-color: var(--accent); }
+.gate-btn { margin-top: 12px; width: 100%; padding: 10px; border-radius: 8px; border: none; cursor: pointer; background: var(--accent); color: #060d0f; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; transition: opacity .2s; }
+.gate-btn:hover { opacity: .85; }
+.gate-err { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--red); margin-top: 10px; min-height: 16px; }
+
+/* ── SIDEBAR ── */
+#sidebar {
+  position: fixed; top: 0; left: 0;
+  width: var(--sidebar-w); height: 100vh;
+  background: rgba(6,13,15,.97); border-right: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  overflow-y: auto; overflow-x: hidden;
+  z-index: 100; padding: 24px 0 40px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.sb-brand { padding: 0 18px 20px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+.sb-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(34,211,238,.25); border-radius: 4px; padding: 3px 8px; margin-bottom: 8px; }
+.sb-title { font-family: 'DM Serif Display', serif; font-size: 17px; color: var(--text); line-height: 1.3; }
+.sb-sub { font-size: 12px; color: var(--muted); margin-top: 3px; font-style: italic; }
+.sb-group { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); padding: 14px 18px 5px; }
+.sb-nav a { display: flex; align-items: center; gap: 9px; padding: 7px 18px; text-decoration: none; font-size: 13px; color: var(--muted); transition: color .15s, background .15s; border-left: 2px solid transparent; }
+.sb-nav a:hover { color: var(--text); background: rgba(255,255,255,.03); }
+.sb-nav a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); }
+.sb-nav .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--faint); flex-shrink: 0; transition: background .15s; }
+.sb-nav a.active .dot { background: var(--accent); }
+.sb-back-row { border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.sb-back-row a { display: flex; align-items: center; gap: 8px; padding: 12px 18px; text-decoration: none; font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: .05em; color: var(--muted); transition: color .15s, background .15s; }
+.sb-back-row a:hover { color: var(--text); background: rgba(255,255,255,.03); }
+
+/* ── MAIN ── */
+#main { margin-left: var(--sidebar-w); flex: 1; position: relative; z-index: 1; }
+
+/* ── HEADER ── */
+#hdr { padding: 48px 56px 32px; border-bottom: 1px solid var(--border); }
+.hdr-eyebrow { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.hdr-title { font-family: 'DM Serif Display', serif; font-size: 42px; color: var(--text); line-height: 1.15; margin-bottom: 6px; }
+.hdr-title span { color: var(--accent); }
+.hdr-sub { color: var(--muted); font-size: 15px; margin-bottom: 28px; font-style: italic; }
+.day-tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.day-tab { padding: 8px 20px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: .07em; cursor: pointer; border: 1px solid var(--border); color: var(--muted); background: transparent; transition: all .2s; }
+.day-tab:hover { color: var(--text); border-color: var(--accent); }
+.day-tab.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+/* ── CONTENT ── */
+#content { padding: 36px 56px 80px; }
+.day-panel { display: none; }
+.day-panel.active { display: block; }
+
+/* ── SECTION CARD ── */
+.sc {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 16px; overflow: hidden;
+  transition: box-shadow .2s, transform .18s;
+  animation: fadeUp .45s cubic-bezier(.16,1,.3,1) both;
+}
+.sc:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+.sc.bl-accent { border-left: 3px solid var(--accent); }
+.sc.bl-amber    { border-left: 3px solid var(--amber); }
+.sc.bl-green  { border-left: 3px solid var(--green); }
+
+.sc-hdr { padding: 20px 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 16px; user-select: none; transition: background .15s; }
+.sc-hdr:hover { background: rgba(255,255,255,.02); }
+.sc-hdr-l { display: flex; align-items: center; gap: 14px; }
+.sc-ico { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; background: var(--accent-soft); border: 1px solid rgba(34,211,238,.2); }
+.sc-ico.amber { background: rgba(251,191,36,.1); border-color: rgba(251,191,36,.2); }
+.sc-ico.green { background: rgba(52,211,153,.1); border-color: rgba(52,211,153,.2); }
+.sc-tag { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 3px; }
+.sc-tag.amber { color: var(--amber); }
+.sc-tag.green { color: var(--green); }
+.sc-name { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--text); line-height: 1.25; }
+.chevron { color: var(--muted); transition: transform .25s; font-size: 14px; flex-shrink: 0; opacity: .7; }
+.sc.open .chevron { transform: rotate(180deg); }
+
+.sc-body { max-height: 0; overflow: hidden; transition: max-height .4s ease, opacity .3s ease; opacity: 0; }
+.sc.open .sc-body { max-height: 4000px; opacity: 1; }
+.sc-in { padding: 4px 28px 28px 80px; border-top: 1px solid var(--border); }
+
+/* ── PROSE ── */
+.sc-in p { margin-bottom: 14px; color: rgba(242,237,230,.88); }
+.sc-in p:last-child { margin-bottom: 0; }
+.sc-in strong, .sc-in b { color: var(--text); font-weight: 600; }
+.sc-in em { color: var(--accent); font-style: italic; }
+.sc-in ul { padding-left: 20px; margin-bottom: 14px; color: rgba(242,237,230,.85); }
+.sc-in li { margin-bottom: 7px; }
+.sc-in li::marker { color: var(--accent); }
+.sc-in ol { list-style: none; padding-left: 0; margin-bottom: 14px; counter-reset: step; }
+.sc-in ol li { counter-increment: step; display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; color: rgba(242,237,230,.85); }
+.sc-in ol li::before { content: counter(step); flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-soft); border: 1px solid rgba(34,211,238,.2); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin-top: 3px; }
+.sc-in h4 { font-family: 'DM Serif Display', serif; font-size: 16px; color: var(--text); margin: 22px 0 9px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+
+/* ── CALLOUT ── */
+.callout { background: var(--accent-soft); border: 1px solid rgba(34,211,238,.2); border-radius: 9px; padding: 15px 18px; margin: 16px 0; }
+.callout.amber { background: rgba(251,191,36,.08); border-color: rgba(251,191,36,.22); }
+.callout.green { background: rgba(52,211,153,.07); border-color: rgba(52,211,153,.22); }
+.c-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); display: block; margin-bottom: 7px; }
+.callout.amber .c-label { color: var(--amber); }
+.callout.green .c-label { color: var(--green); }
+.callout p { color: rgba(242,237,230,.88); margin: 0; font-size: 14.5px; line-height: 1.65; }
+
+/* ── ANOMALY LIST (good/bad badges) ── */
+.anom-list { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.anom { background: var(--surface); border: 1px solid var(--border); border-radius: 9px; padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start; }
+.anom-b { flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .12em; text-transform: uppercase; border-radius: 5px; padding: 3px 8px; margin-top: 2px; white-space: nowrap; }
+.anom-b.bad { color: var(--red); background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); }
+.anom-b.ok  { color: var(--green); background: rgba(52,211,153,.1); border: 1px solid rgba(52,211,153,.2); }
+.anom-text { font-size: 14.5px; color: rgba(242,237,230,.82); line-height: 1.65; }
+.anom-text strong { color: var(--text); }
+
+/* ── TABLE ── */
+.dt { width: 100%; border-collapse: collapse; font-size: 14px; margin: 14px 0; }
+.dt th { background: var(--accent-soft); color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.dt td { padding: 10px 14px; border-bottom: 1px solid rgba(26,49,56,.7); color: rgba(242,237,230,.82); vertical-align: top; line-height: 1.55; }
+.dt td:first-child { color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 12px; white-space: nowrap; }
+.dt td strong { color: var(--text); }
+.dt tr:last-child td { border-bottom: 0; }
+.dt tr:hover td { background: rgba(34,211,238,.03); }
+
+code { font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: rgba(34,211,238,.09); color: var(--accent); border-radius: 4px; padding: 1px 6px; }
+
+/* ── ASSIGNMENTS ── */
+.assign-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 24px; margin-bottom: 12px; display: flex; gap: 18px; align-items: flex-start; }
+.ac-ico { flex-shrink: 0; width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); border: 1px solid rgba(34,211,238,.2); display: flex; align-items: center; justify-content: center; font-size: 17px; }
+.ac-b { flex: 1; }
+.ac-label { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .13em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.ac-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); margin-bottom: 4px; }
+.ac-desc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+.ac-due { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; color: var(--muted); margin-top: 8px; }
+.ac-due span { color: var(--accent); }
+.done-badge { display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; background: rgba(52,211,153,.1); color: #34d399; border: 1px solid rgba(52,211,153,.2); border-radius: 20px; padding: 2px 8px; margin-left: 8px; }
+
+.divider { font-family: 'JetBrains Mono', monospace; font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); margin: 32px 0 14px; padding-left: 2px; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-box">
+    <div class="gate-label">Foundations of AI Agents &middot; Module 3</div>
+    <div class="gate-title">Daivik's Notes</div>
+    <input id="gate-input" class="gate-input" type="password" placeholder="password" autocomplete="off" />
+    <button class="gate-btn" onclick="tryUnlock()">Enter</button>
+    <div class="gate-err" id="gate-err"></div>
+  </div>
+</div>
+
+<nav id="sidebar" style="display:none">
+  <div class="sb-back-row"><a href="../">&larr; Module 3 hub</a></div>
+  <div class="sb-brand">
+    <div class="sb-badge">AI Agents &middot; Module 3</div>
+    <div class="sb-title">Foundations of AI Agents</div>
+    <div class="sb-sub">Prof. Ilan Lobel</div>
+  </div>
+  <div class="sb-group">Day 6 — Sat Aug 22</div>
+  <div class="sb-nav">
+    <a href="#project"><span class="dot"></span>The Project</a>
+    <a href="#grading"><span class="dot"></span>Grading</a>
+    <a href="#eras"><span class="dot"></span>Four Eras of AI</a>
+    <a href="#horizon"><span class="dot"></span>Task Horizon (METR)</a>
+    <a href="#landscape"><span class="dot"></span>Competitive Landscape</a>
+    <a href="#nexttoken"><span class="dot"></span>Next-Token Prediction</a>
+    <a href="#temperature"><span class="dot"></span>Temperature</a>
+    <a href="#sizes"><span class="dot"></span>Model Sizes</a>
+    <a href="#three-additions"><span class="dot"></span>The Three Additions</a>
+    <a href="#loop"><span class="dot"></span>The Agentic Loop</a>
+    <a href="#process"><span class="dot"></span>Project vs. Process</a>
+    <a href="#orchestration"><span class="dot"></span>Orchestration</a>
+    <a href="#twobytwo"><span class="dot"></span>The 2&times;2</a>
+  </div>
+  <div class="sb-group">The build</div>
+  <div class="sb-nav">
+    <a href="#setup"><span class="dot"></span>Setup &amp; Credentials</a>
+    <a href="#chatagent"><span class="dot"></span>The Core Chat Agent</a>
+    <a href="#memory"><span class="dot"></span>How Memory Works</a>
+    <a href="#weather"><span class="dot"></span>Tools — OpenWeather</a>
+    <a href="#calendar"><span class="dot"></span>Google Calendar &times;4</a>
+    <a href="#mistakes"><span class="dot"></span>Four Mistakes</a>
+    <a href="#webhook"><span class="dot"></span>Webhook Swap</a>
+    <a href="#auth"><span class="dot"></span>Header Auth</a>
+    <a href="#lovable"><span class="dot"></span>Lovable Frontend</a>
+    <a href="#vibesec"><span class="dot"></span>Vibecoding Security</a>
+  </div>
+  <div class="sb-group">Design & evaluation</div>
+  <div class="sb-nav">
+    <a href="#designfirst"><span class="dot"></span>Design First</a>
+    <a href="#autoaug"><span class="dot"></span>Automation vs. Augmentation</a>
+    <a href="#criteria"><span class="dot"></span>Three Criteria</a>
+    <a href="#exercise"><span class="dot"></span>Process-Mapping Exercise</a>
+    <a href="#evalhard"><span class="dot"></span>Why Eval Is Hard</a>
+    <a href="#proxima"><span class="dot"></span>The CRM Case</a>
+    <a href="#judge"><span class="dot"></span>LLM-as-Judge</a>
+    <a href="#evalcriteria"><span class="dot"></span>Criteria &amp; the Loop</a>
+    <a href="#hipaa"><span class="dot"></span>HIPAA &amp; Guardrails</a>
+  </div>
+  <div class="sb-group">Strategy</div>
+  <div class="sb-nav">
+    <a href="#paradox"><span class="dot"></span>Paradox of Access</a>
+    <a href="#adoption"><span class="dot"></span>Change Management</a>
+  </div>
+  <div class="sb-group">Reference</div>
+  <div class="sb-nav">
+    <a href="#d6-hooks"><span class="dot"></span>Project Hooks — Day 6</a>
+    <a href="#d6-next"><span class="dot"></span>Next Steps &amp; Deadlines</a>
+  </div>
+</nav>
+
+<div id="main" style="display:none">
+  <div id="hdr">
+    <div class="hdr-eyebrow">NYU Stern &middot; MSBAi &middot; Module 3 &middot; Foundations of AI Agents</div>
+    <h1 class="hdr-title">Foundations of <span>AI Agents</span></h1>
+    <p class="hdr-sub">Prof. Ilan Lobel &middot; next-token prediction &middot; tools, memory and subagents &middot; n8n &rarr; Lovable &middot; orchestration &middot; automation vs. augmentation &middot; evaluation &middot; moats</p>
+    <div class="day-tabs">
+      <button class="day-tab active" data-panel="day6">Day 6 &mdash; Sat Aug 22</button>
+      <button class="day-tab" data-panel="assignments">Assignments</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="panel-day6" class="day-panel active">
+
+      <div class="divider">The 55% — what you are actually being graded on</div>
+
+      <div class="sc bl-accent open" id="project">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🚀</div>
+            <div>
+              <div class="sc-tag">01 · The build</div>
+              <div class="sc-name">The post-module project — requirements</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p><b>Ilan Lobel</b> runs Foundations of AI Agents as a single compressed Saturday, and the whole day is
+pointed at one deliverable: <i>build, deploy and launch a website with an agent behind it.</i></p>
+
+<h4>The shape of it</h4>
+<ul>
+<li><b>Teams of 3</b>, self-selected. 71 students enrolled, so <b>one team of 2</b> exists by arithmetic.</li>
+<li><b>Two deliverables:</b> (1) a deployed agent website &mdash; n8n backend, Lovable frontend; (2) a video walking through the project.</li>
+<li><b>Due Wed Sept 17 2026.</b> Not negotiable by the platform either: <b>Lovable accounts expire Sept 18</b> &mdash; the class licence is billed monthly, so the site dies the day after it is due.</li>
+<li>Text in, text out. <b>Avoid image and video inputs</b> for this project &mdash; they add failure modes without adding grade.</li>
+</ul>
+
+<div class="callout amber"><span class="c-label">Verify — video length</span>
+<p>Today's brief said <b>5 minutes</b>. The written spec circulating earlier said <b>8 minutes</b>.
+Check the course website before you cut the edit &mdash; the difference is a third of the runtime.</p></div>
+
+<h4>Inspiration — the spring Tech MBA cohort</h4>
+<p>Lobel's framing: the spring cohort was largely <i>non-technical</i> and still shipped genuinely impressive
+things. The examples he named:</p>
+<ul>
+<li>A real-estate agent site</li>
+<li>A health-data analyzer</li>
+<li>A pizza-price aggregator across every shop in NYC</li>
+</ul>
+<p>The instruction that follows: <b>pick a real pain point out of your own domain expertise.</b> The project is
+graded partly on whether you can make the case that the problem matters &mdash; which you can only do for a
+problem you actually have.</p>
+
+<div class="callout"><span class="c-label">Due today</span>
+<p><b>Tell Nipun your team composition today, Sat Aug 22.</b> Self-selected teams, three people.
+This is the one deadline from the session that is not in September.</p></div>
+
+<div class="callout green"><span class="c-label">Afterwards</span>
+<p>Post the finished project on <b>LinkedIn</b>. Lobel's pitch: <b>NYU and Kellogg are currently the only two
+business schools running a class like this</b>, so the artefact is a differentiator while it is still rare.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="grading">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">📊</div>
+            <div>
+              <div class="sc-tag">02 · Grading</div>
+              <div class="sc-name">The four equal quarters</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><h4>Course grade</h4>
+<table class="dt">
+<tr><th>Weight</th><th>Component</th><th>State</th></tr>
+<tr><td>25%</td><td><b>Pre-module assignment</b></td><td>Already submitted</td></tr>
+<tr><td>20%</td><td><b>In-class participation</b></td><td>Banked today</td></tr>
+<tr><td>55%</td><td><b>Post-module project</b></td><td>Due Sept 17</td></tr>
+</table>
+
+<h4>Inside the 55% — four components, each worth 20% of the project</h4>
+<ol>
+<li><b>Problem and value proposition</b> &mdash; make the case for <i>why this problem matters</i> and why you picked it.</li>
+<li><b>Agent design</b> &mdash; the backend agent plus the frontend website.</li>
+<li><b>Evaluation work</b> &mdash; what is the agent good at, what is it bad at, and how did you use feedback to improve it.</li>
+<li><b>Presentation quality</b> &mdash; clarity and professionalism of the video.</li>
+</ol>
+
+<div class="callout amber"><span class="c-label">Read this twice</span>
+<p><b>Only one of the four components is the build.</b> Half the grade is problem framing and evaluation &mdash;
+the two things that cannot be produced the night before, and the two things Lovable cannot do for you.
+The Agent Design Worksheet has no evaluation section, so <b>component 3 is work you owe on top of the worksheet.</b></p></div>
+
+<h4>Team composition matters to the grade</h4>
+<p><b>At least one and ideally two team members should have real domain expertise</b> in whatever you pick &mdash;
+because component 3 requires someone who can look at the agent's output and say, with authority, whether it
+is any good. Without a domain expert on the team you have no gold standard, and with no gold standard you
+cannot do the evaluation component at all.</p>
+
+<div class="callout"><span class="c-label">Resource</span>
+<p>Sample projects from the spring class are on the course website &mdash; <code>nyu.edu</code>, click <b>Projects</b>.</p></div></div></div>
+      </div>
+
+      <div class="divider">Where agents came from</div>
+
+      <div class="sc bl-accent" id="eras">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🌊</div>
+            <div>
+              <div class="sc-tag">03 · History</div>
+              <div class="sc-name">Four eras of AI</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Lobel's framing device for the whole morning. Each era did not replace the last &mdash; the earlier ones
+are still doing most of the paid work in industry.</p>
+<ol>
+<li><b>Traditional supervised learning</b> &mdash; demand forecasting, credit scoring. <b>50+ years old and still
+very useful.</b> This is most of what Bapna taught on Days 1&ndash;3.</li>
+<li><b>Deep learning</b> &mdash; kicked off in <b>2012 with AlexNet</b> (Geoff Hinton's team, Ilya Sutskever among them),
+which won ImageNet by separating cats from dogs in photographs &mdash; a task previously considered impossible.</li>
+<li><b>Generative AI</b> &mdash; the ChatGPT moment, <b>November 2022</b>. The machine generates language and images
+and holds a conversation.</li>
+<li><b>Agentic AI</b> &mdash; the current era and another step change. Agents <b>understand intent, plan, and execute
+autonomously</b> rather than answering one question at a time.</li>
+</ol>
+<div class="callout"><span class="c-label">The point of the ladder</span>
+<p>Each step moved the unit of work up: from <i>a prediction</i>, to <i>a perception</i>, to <i>a paragraph</i>,
+to <i>a task</i>. The project you are building lives on step four, but nothing stops you from putting a
+step-one model inside it.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="horizon">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">📈</div>
+            <div>
+              <div class="sc-tag">04 · The curve</div>
+              <div class="sc-name">Task horizon — the METR benchmark</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>The single most quoted chart of the session. <b>METR</b> measures how much human work a single model prompt
+can replace, denominated in <b>human-hours</b>.</p>
+<table class="dt">
+<tr><th>Model</th><th>Human work replaced by one prompt</th></tr>
+<tr><td>GPT launch</td><td>~30 seconds</td></tr>
+<tr><td>GPT-4</td><td>~5 minutes &mdash; e.g. summarize a conversation</td></tr>
+<tr><td>Mid-2025</td><td>~1 hour</td></tr>
+<tr><td>2026</td><td><b>Broke the benchmark's top rung &mdash; 16 hours, two full workdays</b>, with guardrails</td></tr>
+</table>
+
+<div class="callout green"><span class="c-label">His own example</span>
+<p>Lobel took every change from a revised research paper and asked the model to update the corresponding
+presentation deck. <b>Two days of manual work, done in one prompt.</b></p></div>
+
+<div class="callout amber"><span class="c-label">The part people misread</span>
+<p><b>The chart is log scale.</b> It looks like a gentle line and it is an exponential. His conclusion, aimed
+directly at the room: getting in now is <i>still</i> getting in very early.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="landscape">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">⚔️</div>
+            <div>
+              <div class="sc-tag">05 · Market</div>
+              <div class="sc-name">The competitive landscape</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><h4>Where the money is</h4>
+<ul>
+<li><b>Anthropic revenue is now roughly 2&times; OpenAI's</b>, and Anthropic is reportedly targeting a
+<b>$2T IPO valuation</b>; OpenAI is valued around <b>$1T</b>.</li>
+<li>Anthropic's inflection point was <b>Claude's coding agent going viral in Dec 2025</b> &mdash; the moment
+agents stopped being theoretical.</li>
+<li>Anthropic is profitable in some quarters. <b>OpenAI is still losing money.</b></li>
+</ul>
+
+<h4>Why Google fell behind — the Innovator's Dilemma</h4>
+<p>Straight out of <b>Clay Christensen</b>. Google had the research and the talent and did not ship a chatbot,
+because a chatbot <b>cannibalizes sponsored-search ad revenue</b> &mdash; the thing paying for everything else.
+Lobel's phrase for the aftermath of ChatGPT: Google went into <b>&ldquo;cold dread&rdquo;</b> and has been
+catching up ever since.</p>
+<div class="callout"><span class="c-label">Don't write them off</span>
+<p>Google still has enormous proprietary data and enormous talent. It is behind, not out. <b>Meta</b> is in a
+similar position for similar reasons.</p></div>
+
+<h4>The Chinese models</h4>
+<p><b>DeepSeek, Qwen, Kimi, Minimax</b> &mdash; genuinely strong competitors and <b>significantly cheaper to run</b>.
+The DeepSeek moment mattered because it showed excellent output at a fraction of the cost, which is
+precisely the mechanism that commoditizes the bottom of the market. <i>(The moat question this raises is
+deferred to Lecture 3.)</i></p></div></div>
+      </div>
+
+      <div class="divider">How the machine actually works</div>
+
+      <div class="sc bl-accent" id="nexttoken">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎲</div>
+            <div>
+              <div class="sc-tag">06 · Mechanism</div>
+              <div class="sc-name">Next-token prediction, and what follows from it</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>A <b>token</b> is roughly a word &mdash; sometimes half a word. Given a sequence of tokens, the model produces
+the most probable next token, then the next, then the next. Each one comes off a <b>probability distribution</b>:</p>
+<div class="callout"><span class="c-label">The distribution</span>
+<p>&ldquo;Donald &hellip;&rdquo; &rarr; <b>&ldquo;Trump&rdquo; 62%</b> &middot; <b>&ldquo;elected&rdquo; 22%</b> &middot; a long tail of everything else.
+<b>Training a model means learning these distributions across the entire internet.</b> That is the whole trick.</p></div>
+
+<h4>Three properties that fall straight out of the mechanism</h4>
+<div class="anom-list">
+<div class="anom"><span class="anom-b bad">Probabilistic</span><span class="anom-text">
+The same input can produce a different output every run &mdash; <b>fundamentally unlike traditional software</b>,
+where identical input always gives identical output. <b>This is the same property that gives you creativity
+and that gives you hallucination.</b> You cannot keep one and delete the other.</span></div>
+<div class="anom"><span class="anom-b bad">Frozen at training</span><span class="anom-text">
+No knowledge of anything after the training cutoff. Trained in March, released in July &rarr; it knows nothing
+about the World Cup that happened in between. <b>This is why tools exist.</b></span></div>
+<div class="anom"><span class="anom-b bad">Confident when wrong</span><span class="anom-text">
+Because it is only ever picking the most probable next word, <b>it sounds exactly as authoritative when
+hallucinating as when correct.</b> There is no internal tell for you to read.</span></div>
+</div>
+
+<div class="callout amber"><span class="c-label">Carry this into the project</span>
+<p>Every design decision downstream &mdash; orchestration, the 2&times;2, human-in-the-loop, evaluation &mdash;
+exists to manage these three properties. If you understand this card, the rest of the day is consequences.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="temperature">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🌡️</div>
+            <div>
+              <div class="sc-tag">07 · Knob</div>
+              <div class="sc-name">Temperature — and the knob that replaced it</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p><b>Temperature controls how random the output is</b> by reshaping the probability distribution before sampling.</p>
+<div class="anom-list">
+<div class="anom"><span class="anom-b bad">High &middot; 1.0</span><span class="anom-text">
+<b>Flattens</b> the distribution &mdash; unlikely tokens become more probable. More creative, more hallucination.</span></div>
+<div class="anom"><span class="anom-b ok">Low &middot; 0.0</span><span class="anom-text">
+<b>Collapses</b> to 100% on the top token every time. Deterministic, predictable, dull, less hallucination.</span></div>
+</div>
+
+<h4>The history of the knob</h4>
+<ul>
+<li>Default was <b>0.7</b> in GPT models up through GPT-4, and users could set it explicitly.</li>
+<li><b>Modern models (Claude, newer GPT) no longer expose temperature</b> as a user-facing control &mdash; the
+providers tune it internally.</li>
+<li>In <b>n8n</b>, with older models, you can still set it and experiment. Worth doing once just to watch the
+output loosen.</li>
+</ul>
+
+<div class="callout"><span class="c-label">What replaced it</span>
+<p>The control you now have is <b>how much thinking to apply</b> &mdash; instant / medium / high / very high / pro
+in ChatGPT. That is a proxy for <b>how many tokens the model spends planning and verifying</b> before it answers.
+Temperature tuned the sampling; the thinking dial tunes the effort.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="sizes">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧠</div>
+            <div>
+              <div class="sc-tag">08 · Sizing</div>
+              <div class="sc-name">Model sizes — and which one to build with</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>The names are sizes of neural network, not different products. <b>Haiku / Sonnet / Opus</b> for Claude;
+<b>mini / standard / o-series</b> for OpenAI.</p>
+<div class="anom-list">
+<div class="anom"><span class="anom-b bad">Larger</span><span class="anom-text">
+More expensive per token, <b>slower</b>, more capable.</span></div>
+<div class="anom"><span class="anom-b ok">Smaller</span><span class="anom-text">
+Cheaper, <b>faster</b>, and good enough for essentially everything in this class.</span></div>
+</div>
+
+<div class="callout green"><span class="c-label">For the build</span>
+<p>Use <b>GPT-4o-mini</b> or <b>Gemini Flash</b>. Big reasoning models like o3 are <b>too slow for iterative
+building</b> &mdash; you will be running the same workflow forty times, and a 30-second round trip turns an
+afternoon into a week.</p></div></div></div>
+      </div>
+
+      <div class="divider">From a language model to an agent</div>
+
+      <div class="sc bl-accent" id="three-additions">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔧</div>
+            <div>
+              <div class="sc-tag">09 · Anatomy</div>
+              <div class="sc-name">The three additions that make an agent</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>An agent is not a different kind of model. It is the same next-token machine with <b>three extra token
+types</b> that let it act.</p>
+<ol>
+<li><b>Reasoning tokens.</b> A special token tells the model to think silently first &mdash; it generates internal
+&ldquo;scratch paper&rdquo; that is never shown to you, reasons through the problem, then answers.
+<i>Not a different model</i> &mdash; the same model, with a token that shifts the distribution toward
+reasoning-style text.</li>
+<li><b>Tool calls.</b> A token triggers an external action &mdash; read email, query a database, run a Python
+script, hit an API. <b>The result is injected back into the token sequence</b> and generation continues as if
+it had always been there.</li>
+<li><b>Subagents.</b> A token spawns a specialized child agent. The child runs its task and feeds results back
+to the parent. This is what buys you <b>parallelism and specialization</b>.</li>
+</ol>
+
+<div class="callout amber"><span class="c-label">Why reasoning traces are hidden</span>
+<p>Companies hide the reasoning trace to prevent <b>distillation</b> &mdash; a competitor training a cheaper model
+on your model's own thinking. The trace is the most valuable output, so you never see it.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="loop">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">♾️</div>
+            <div>
+              <div class="sc-tag">10 · Loop</div>
+              <div class="sc-name">The agentic loop</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="anom-list">
+<div class="anom"><span class="anom-b bad">Three years ago</span><span class="anom-text">
+You write a prompt &rarr; you get a response &rarr; <b>you</b> iterate. The human is the loop.</span></div>
+<div class="anom"><span class="anom-b ok">Now</span><span class="anom-text">
+You give a <b>goal</b> &rarr; the agent <b>plans</b> &rarr; <b>executes with tools</b> &rarr; <b>verifies</b> the output
+&rarr; loops back if verification fails. The human sets the objective and inspects the result.</span></div>
+</div>
+<p>The thinking dial in ChatGPT (instant &rarr; pro) is really a dial on <b>how long the agent spends in the
+planning and verification phases</b> of that loop.</p>
+<div class="callout"><span class="c-label">Design consequence</span>
+<p><b>Verification is a step in the loop, not an afterthought.</b> If your agent has no way to check its own
+output, the loop has no exit condition except &ldquo;it produced something.&rdquo;</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="process">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">⚙️</div>
+            <div>
+              <div class="sc-tag">11 · Framing</div>
+              <div class="sc-name">AI project vs. AI process</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Lobel's stated goal for the day: <b>shift your mental model from AI projects to AI processes.</b></p>
+<table class="dt">
+<tr><th></th><th>AI project</th><th>AI process</th></tr>
+<tr><td>Shape</td><td>One-off</td><td><b>Always on</b></td></tr>
+<tr><td>Starts</td><td>You open ChatGPT and ask</td><td>A <b>trigger</b> (new email) or a <b>schedule</b> (every morning)</td></tr>
+<tr><td>Needs you</td><td>Every single time</td><td>Once, at design time</td></tr>
+<tr><td>Value</td><td>Saves you an hour</td><td><b>Where the economic value is</b></td></tr>
+</table>
+<div class="callout green"><span class="c-label">Why it matters beyond the class</span>
+<p><b>The stock market and enterprise investment are pricing AI processes, not one-off projects.</b>
+A chatbot someone has to remember to open is not an operating change; a thing that fires on every inbound
+email is.</p></div>
+<div class="callout amber"><span class="c-label">Project implication</span>
+<p>Your deliverable is a <i>website with an agent behind it</i> &mdash; which is a project shape. The way to score
+on component 1 is to make the case that it sits inside a <b>process</b>: what triggers it, how often, and what
+happens to the output.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="orchestration">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎛️</div>
+            <div>
+              <div class="sc-tag">12 · Lever</div>
+              <div class="sc-name">Orchestration — the dial you actually control</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p><b>Orchestration = how much structure you impose on the agent's sequence of steps</b>, versus how much freedom
+you hand the LLM.</p>
+<div class="anom-list">
+<div class="anom"><span class="anom-b ok">More orchestration</span><span class="anom-text">
+More predictable. <b>Better at managing stochasticity.</b> Looks like traditional code: do this, then this,
+then that.</span></div>
+<div class="anom"><span class="anom-b bad">Less orchestration</span><span class="anom-text">
+More flexible. <b>Better at novel situations.</b> The LLM figures it out.</span></div>
+</div>
+<p>Real systems are a <b>combination</b> &mdash; some rule-based structure, some LLM interpretation.</p>
+<div class="callout"><span class="c-label">The one-liner</span>
+<p><b>Orchestration is the key lever for managing the probabilistic nature of LLMs in production.</b> When your
+agent misbehaves, the first question is not &ldquo;which model?&rdquo; &mdash; it is &ldquo;which of these steps should
+I have taken away from it?&rdquo;</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="twobytwo">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🎯</div>
+            <div>
+              <div class="sc-tag">13 · Framework</div>
+              <div class="sc-name">The 2×2 — when to use an agent at all</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Axes: <b>cost of error</b> (low &harr; high) &times; <b>ambiguity</b> (low &harr; high).</p>
+<table class="dt">
+<tr><th></th><th>Low cost of error</th><th>High cost of error</th></tr>
+<tr><td><b>High ambiguity</b></td><td><b>Agent sweet spot</b> &mdash; complex, open-ended tasks where mistakes are survivable</td><td><b>Human in the loop</b> &mdash; agent interprets, human decides</td></tr>
+<tr><td><b>Low ambiguity</b></td><td><b>Traditional automation</b> &mdash; vending-machine logic, no LLM needed</td><td><b>Deterministic software</b> with strict rules</td></tr>
+</table>
+<div class="callout amber"><span class="c-label">Use it as a filter, not decoration</span>
+<p>Two of the four boxes say <b>do not build an agent</b>. Running your project idea through this honestly is
+free marks on component 1 &mdash; and if your idea lands bottom-left, an LLM is the wrong tool and you should
+pick another idea today rather than in September.</p></div></div></div>
+      </div>
+
+      <div class="divider">The build — n8n → Lovable, step by step</div>
+
+      <div class="sc bl-accent" id="setup">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔑</div>
+            <div>
+              <div class="sc-tag">14 · Setup</div>
+              <div class="sc-name">Credentials, API keys, and what to actually pay for</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Platform is <b>n8n</b> &mdash; model-agnostic orchestration. It will connect to OpenAI, Anthropic, Gemini,
+DeepSeek, Groq and the rest, which is the point: you are learning the wiring, not one vendor.</p>
+
+<div class="callout amber"><span class="c-label">What went wrong in class</span>
+<p>The <b>$5 of free OpenAI credit</b> provided through n8n <b>did not work reliably</b> for the room. Have a
+fallback before the next session.</p></div>
+
+<h4>Fallbacks, in the order he gave them</h4>
+<ul>
+<li><b>Google AI Studio</b> &mdash; free <b>Gemini Flash</b> API key, <b>500 prompts/day</b> on the free tier.
+Generate the key, paste it into n8n credentials.</li>
+<li><b>Groq</b> &mdash; free API key, no charge. His recommended fallback.</li>
+<li><b>OpenAI developer platform</b> &mdash; buy <b>$5</b> of API credit at <code>platform.openai.com</code>.
+For reference, <b>$10 lasted an entire spring semester</b> of this kind of work.</li>
+</ul>
+
+<div class="callout"><span class="c-label">API credit ≠ subscription</span>
+<p>These are two different products. <b>API access is programmatic</b> &mdash; computer to computer &mdash; and is
+bought on the <b>developer platform</b>. A ChatGPT Plus subscription buys you the website and does nothing for
+your n8n workflow. Separately, he does recommend paying the <b>$20/month</b> for ChatGPT Plus or Claude Pro:
+the gap in output quality against the free tiers is <b>&ldquo;night and day.&rdquo;</b></p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="chatagent">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">💬</div>
+            <div>
+              <div class="sc-tag">15 · Build</div>
+              <div class="sc-name">The core workflow — a chat agent in seven steps</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><ol>
+<li><b>New workflow</b> &rarr; the plus button &rarr; add an <b>AI Agent</b> node.</li>
+<li>The AI Agent node has <b>three connection points</b>: <b>chat model</b> (the LLM), <b>memory</b>, and <b>tools</b>.
+Everything today hangs off those three.</li>
+<li><b>Add a chat model</b> &mdash; Gemini Flash or GPT-4o-mini, with your API credential; pick the model from the dropdown.</li>
+<li><b>Open the chat</b> and test something trivial: <i>&ldquo;my favorite color is red.&rdquo;</i></li>
+<li><b>Observe the failure:</b> with no memory node attached, the agent does not remember the previous message.
+This is not a bug &mdash; it is the default.</li>
+<li><b>Add a Simple Memory node</b>, context size <b>5</b> (it keeps the last five messages), and connect it.
+Test recall.</li>
+<li><b>Add a system prompt</b> &mdash; double-click the AI Agent node &rarr; <b>Options</b> &rarr; <b>Add System Message</b>.</li>
+</ol>
+
+<div class="callout"><span class="c-label">The system prompt is the whole ballgame</span>
+<p>It is <b>the most important configuration in the node</b>, and n8n buries it under <b>Options</b>. Write plain
+English: who the agent is, what it should do, <b>what it must never do</b>, and the tone or persona.
+The class test case was <i>&ldquo;you are my pirate assistant, speak like a pirate&rdquo;</i> &mdash; deliberately silly,
+because you want an unmistakable signal that the prompt is being applied.</p></div>
+
+<div class="callout amber"><span class="c-label">Subtlety worth knowing</span>
+<p>The system prompt is sent to the LLM <b>on every message</b>, but it is <b>not stored in the simple memory</b>.
+Memory holds the conversation; the system prompt is re-attached each turn.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="memory">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🧵</div>
+            <div>
+              <div class="sc-tag">16 · Mechanism</div>
+              <div class="sc-name">How memory actually works under the hood</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>This is the card that changes how you debug everything else.</p>
+<ul>
+<li>Every new message ships <b>the entire conversation history</b> to the LLM as context.</li>
+<li>Each call may land on a <b>completely different server</b> &mdash; different data centre, different chip.</li>
+<li>So it <i>feels</i> like a conversation and is actually <b>a series of independent one-shot calls</b>, each with
+the full history prepended.</li>
+</ul>
+
+<div class="callout"><span class="c-label">Why context windows are the spec everyone quotes</span>
+<p>Because <b>the whole conversation is re-sent every single time.</b> That is the real cost driver, and the real
+constraint.</p></div>
+
+<h4>Practical consequences in n8n</h4>
+<ul>
+<li>Memory set to <b>5</b>: send the 6th message and <b>the oldest is dropped</b>.</li>
+<li>Even with memory set to <b>1</b>, the agent seems to retain more &mdash; because <b>its own previous answer
+contains references to earlier content</b>. Context leaks forward through the model's own text.</li>
+<li>Use the <b>Reset button</b> between tests. Otherwise old context bleeds into the next run and you will
+debug a ghost.</li>
+</ul></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="weather">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🌦️</div>
+            <div>
+              <div class="sc-tag">17 · Tools</div>
+              <div class="sc-name">First tool — OpenWeather, and the fairy dust</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><ol>
+<li>Click the plus on the <b>Tools</b> connection of the AI Agent node.</li>
+<li>Search <b>OpenWeather</b>; add your OpenWeather API credential.</li>
+<li>Choose <b>Current Weather</b>; pick Imperial or Metric.</li>
+<li><b>Set the city field to an expression</b> &mdash; the sparkle / &ldquo;fairy dust&rdquo; icon. This is the move:
+it tells the agent to <b>work the city out from the user's message</b> instead of you hardcoding one.</li>
+<li>Test: <i>&ldquo;What is the weather in New York City?&rdquo;</i></li>
+</ol>
+
+<div class="callout green"><span class="c-label">Read the execution log — this is the lesson</span>
+<p>agent &rarr; <b>memory (retrieve)</b> &rarr; LLM &rarr; <b>OpenWeather tool</b> &rarr; <b>memory (store)</b> &rarr; LLM again
+to formulate the response. <b>Memory is touched twice</b> &mdash; once to load context, once to save the exchange &mdash;
+and <b>the LLM is called twice</b>: once to decide to use the tool, once to write the answer using the result.</p></div>
+
+<div class="callout amber"><span class="c-label">Expression fields are the difference between a tool and a setting</span>
+<p>A hardcoded field is configuration. <b>An expression field is a parameter the agent gets to choose</b>,
+which is what makes the tool usable across arbitrary requests.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="calendar">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">📅</div>
+            <div>
+              <div class="sc-tag">18 · Tools</div>
+              <div class="sc-name">Google Calendar — four operations, one prompt</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>The centrepiece build. Four separate tool nodes on the same agent, one per operation.</p>
+<ol>
+<li><b>Create</b> &mdash; Google Calendar tool, operation Create. Connect Google credentials. Set <b>Summary,
+Description, Location</b> to expressions, and <b>Start</b> and <b>End</b> to expressions too.</li>
+<li><b>Get Many</b> &mdash; retrieve events between <b>now and one week out</b>.</li>
+<li><b>Delete</b> &mdash; set <b>Event ID</b> to an expression.</li>
+<li><b>Update</b> &mdash; Summary, Description, Location, <b>Start time and End time all as expressions</b>.</li>
+</ol>
+
+<div class="callout amber"><span class="c-label">The failure everyone hits</span>
+<p><b>Omit Start and End from the Update tool and the agent cannot change event times</b> &mdash; so it will
+silently do the next best thing it can: <b>delete the event and recreate it.</b> It looks like it worked. It is
+not what you asked for, and on a real calendar it destroys the invite and the attendee list.</p></div>
+
+<h4>Then go back and rewrite the system prompt</h4>
+<p><b>Explicitly list all four tools</b> &mdash; add, get many, delete, update &mdash; and what each one is for.
+This <b>significantly improves tool-selection accuracy</b>. The agent is choosing from a menu; a menu with
+descriptions beats a menu of function names.</p>
+
+<div class="callout green"><span class="c-label">The test that proves it</span>
+<p><i>&ldquo;Move basketball from 6&ndash;7 PM to 7&ndash;8 PM and add NYU Gym as the location.&rdquo;</i>
+&rarr; the agent correctly calls <b>Update</b> with new times <i>and</i> the location, instead of delete-and-recreate.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-amber" id="mistakes">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico amber">⚠️</div>
+            <div>
+              <div class="sc-tag amber">19 · Debugging</div>
+              <div class="sc-name">The four mistakes he flagged by name</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="anom-list">
+<div class="anom"><span class="anom-b bad">Prompt in the wrong box</span><span class="anom-text">
+Putting the system prompt in the agent node's <b>prompt input field</b> instead of the <b>system message under
+Options</b>. That field <b>replaces the user's chat input</b> rather than augmenting it &mdash; so the agent
+ignores the conversation entirely and answers your instructions instead.</span></div>
+<div class="anom"><span class="anom-b bad">Update without times</span><span class="anom-text">
+No Start/End on the Update calendar tool &rarr; <b>agent falls back to delete + create</b>.</span></div>
+<div class="anom"><span class="anom-b bad">Dirty memory</span><span class="anom-text">
+Not resetting memory between tests &rarr; <b>old conversation context bleeds into new tests</b> and you chase
+a bug that is not there.</span></div>
+<div class="anom"><span class="anom-b bad">Test URL in production</span><span class="anom-text">
+Using the <b>test webhook URL</b> instead of the <b>production URL</b> when wiring Lovable. The test URL only
+listens while you have the n8n editor open and armed.</span></div>
+</div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="webhook">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔌</div>
+            <div>
+              <div class="sc-tag">20 · Deploy</div>
+              <div class="sc-name">Swapping the chat trigger for a webhook</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>To put a real website in front of the agent, the chat trigger has to go.</p>
+<ol>
+<li><b>Delete the Chat Trigger node.</b></li>
+<li>Add a <b>Webhook</b> node. Method <b>POST</b>. Response mode: <b>Respond Using &ldquo;Respond to Webhook&rdquo;</b> &mdash;
+so a downstream node returns the answer, not the webhook node itself.</li>
+<li>Add a <b>Respond to Webhook</b> node at the end of the workflow, set to <b>First Incoming Item</b>.</li>
+<li><b>AI Agent node:</b> change input from <i>Get from Chat Trigger</i> to <b>Define Below</b>, and pass
+<code>$json</code> &mdash; the full JSON from the webhook &mdash; to the agent.</li>
+<li><b>Simple Memory node:</b> change the session key to <b>Define Below</b> and set a fixed session identifier.
+That is fine for a single-user site; <b>multi-user needs a unique key per user</b> or everyone shares one
+conversation.</li>
+</ol>
+<div class="callout amber"><span class="c-label">Stop here</span>
+<p><b>Do not publish yet.</b> The next card is not optional.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-amber" id="auth">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico amber">🔒</div>
+            <div>
+              <div class="sc-tag amber">21 · Security</div>
+              <div class="sc-name">Header auth — the step you cannot skip</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>An unauthenticated webhook is a <b>public URL that spends your API credit and touches your calendar</b>.
+Anyone who finds it can use it.</p>
+<ol>
+<li>Webhook node &rarr; <b>Authentication</b> &rarr; <b>Header Auth</b>.</li>
+<li>Create a Header Auth credential: <b>Name = <code>password</code></b>, <b>Value = a password you will remember</b>
+&mdash; you have to type it into the website later.</li>
+<li>Now only requests carrying the correct header can trigger the agent.</li>
+</ol>
+<div class="callout"><span class="c-label">Design note</span>
+<p>This is a shared secret, not a user system. It stops drive-by use of your endpoint; it does not give you
+per-user identity. For the project that is the right amount of security &mdash; for anything real, it is not.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="lovable">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🪄</div>
+            <div>
+              <div class="sc-tag">22 · Frontend</div>
+              <div class="sc-name">Building the site in Lovable</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><ol>
+<li>Log into <b>Lovable</b>. The corporate account gives <b>5 free daily credits + 25 monthly</b>; a free personal
+account gives 5 daily.</li>
+<li>Copy the <b>production</b> webhook URL out of n8n &mdash; <b>not the test URL</b>.</li>
+<li>Prompt Lovable in plain English: what the site is for, paste the webhook URL, specify <b>POST</b>, specify
+<b>Header Auth with name <code>password</code></b>, and instruct it to <b>ask the user for the password and pass it
+as a header</b>.</li>
+<li><b>Do not hardcode the password in the Lovable prompt.</b> The frontend should collect it at runtime from
+the user. <b>The frontend itself should never know the password value</b> &mdash; anything in the frontend is
+readable by anyone who opens the page.</li>
+<li>Lovable builds in <b>2&ndash;3 minutes</b> and will flag security warnings if the auth handling is ambiguous.</li>
+<li><b>Publish</b>, name the site (his demo: <i>BotCalMagic</i>). Lovable runs a security check before publishing.</li>
+<li>Visit the live site, enter the password, talk to your calendar.</li>
+</ol>
+<div class="callout amber"><span class="c-label">Shared workspace — read this</span>
+<p>The class shares <b>one n8n workspace and one Lovable workspace</b>, built like a company account where all
+employees see each other's projects. <b>Published Lovable sites are public by default</b> &mdash; anyone with the
+URL sees the login page, anyone with the password gets the agent. <b>Turn off cross-project sharing in Lovable
+settings</b> if you do not want classmates in your project. Unpublishing takes the site offline; the n8n
+workflow keeps existing.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-amber" id="vibesec">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico amber">🕷️</div>
+            <div>
+              <div class="sc-tag amber">23 · Risk</div>
+              <div class="sc-name">Vibecoding security — two real incidents</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Lovable is built for people who are not engineers, and that is exactly what creates the exposure at scale.</p>
+<div class="anom-list">
+<div class="anom"><span class="anom-b bad">Incident</span><span class="anom-text">
+A <b>women's safety app</b> built on Lovable stored <b>government ID photos</b> behind an insecure webhook &mdash;
+anyone with the URL could download all of them.</span></div>
+<div class="anom"><span class="anom-b bad">Incident</span><span class="anom-text">
+<b>A single line of Python</b> could pull <b>all SQL records</b> &mdash; including PII &mdash; out of insecure
+Lovable sites.</span></div>
+</div>
+<p><b>The distinction that matters:</b> prototyping and experimenting, as in this class, is fine. <b>Deploying at
+scale with real user data requires a real security review.</b> Lovable's flagging has improved a lot in the last
+six months and still should not be trusted for sensitive deployments.</p>
+<div class="callout"><span class="c-label">His closing line on it</span>
+<p><i>&ldquo;With great power comes great responsibility.&rdquo;</i> Vibecoding is a superpower; be careful before you
+put real users behind it.</p></div></div></div>
+      </div>
+
+      <div class="divider">Design & judgment — the half of the grade that isn't building</div>
+
+      <div class="sc bl-accent" id="designfirst">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">📐</div>
+            <div>
+              <div class="sc-tag">24 · Method</div>
+              <div class="sc-name">Design first — the framework, not the tools</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p><b>Most people start by mapping the workflow or picking tools. That is backwards.</b> Start from product
+design thinking, not from the agent's point of view.</p>
+<div class="callout"><span class="c-label">The example that lands it</span>
+<p><b>Read email vs. write email.</b> Same inbox, same model, same tooling &mdash; and completely different risk
+profiles. One is reversible and private; the other is irreversible and goes to another human being.
+<b>You cannot see that difference from the workflow diagram.</b> You can only see it from the user's side.</p></div>
+<div class="callout green"><span class="c-label">Required</span>
+<p>The <b>Agent Design Worksheet</b> from Lecture 2 is required reading and <b>gets submitted as part of the
+project</b>. Nine sections: objective, scenarios, features, tools, workflow, constraints, failure modes,
+persona, system prompt &mdash; everything you should have settled <i>before opening n8n</i>.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="autoaug">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🤝</div>
+            <div>
+              <div class="sc-tag">25 · Archetypes</div>
+              <div class="sc-name">Automation vs. augmentation vs. hybrid</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="anom-list">
+<div class="anom"><span class="anom-b ok">Automated</span><span class="anom-text">
+<b>AI decides end to end, no human in the loop.</b> Good for low cost of error, repetitive work, and output
+that is easy to verify.</span></div>
+<div class="anom"><span class="anom-b ok">Augmented</span><span class="anom-text">
+<b>AI drafts or assists; the human makes every decision.</b> Good for creative work, high ambiguity, and
+output that is hard to verify.</span></div>
+<div class="anom"><span class="anom-b ok">Hybrid</span><span class="anom-text">
+<b>Automated for the clear cases, human review for the edges.</b> Credit-card approval is the canonical shape:
+auto-approve low risk, auto-decline high risk, <b>route the middle band to a human</b>.</span></div>
+</div>
+
+<h4>The human in the loop plays two roles at once</h4>
+<table class="dt">
+<tr><th>Role</th><th>What it buys / costs</th></tr>
+<tr><td><b>Guardrail</b></td><td>Accountability and ethics. A person can be held responsible and <b>can be fired. An AI cannot be fired.</b></td></tr>
+<tr><td><b>Bottleneck</b></td><td>Humans are slow. <b>Send too much to review and the queue piles up</b> and the whole benefit evaporates.</td></tr>
+</table>
+<div class="callout amber"><span class="c-label">The tension is the design problem</span>
+<p><b>Guardrail vs. bottleneck.</b> Every human-in-the-loop decision is a trade between the two, and
+&ldquo;send everything to a human&rdquo; is not a safe answer &mdash; it is a broken process wearing a safety
+jacket.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="criteria">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">✅</div>
+            <div>
+              <div class="sc-tag">26 · Test</div>
+              <div class="sc-name">Three criteria for good automation</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><ol>
+<li><b>Low cost of error</b> &mdash; mistakes are cheap and recoverable.</li>
+<li><b>Good, clean data</b> &mdash; tacit knowledge or dirty data makes automation unreliable.</li>
+<li><b>Easy to verify</b> &mdash; you can tell, cheaply, whether the output was right.</li>
+</ol>
+<div class="callout green"><span class="c-label">Why coding and math went first</span>
+<p><b>Correctness is easy to test.</b> That is the entire reason those two domains took off with LLMs before
+everything else &mdash; not because they are easier, but because <b>verification is automatable</b>.
+<i>If you cannot verify the output, you cannot trust the automation.</i></p></div>
+
+<h4>What to do when a criterion fails</h4>
+<table class="dt">
+<tr><th>Failing</th><th>Move</th></tr>
+<tr><td><b>Cost of error is high</b></td><td>Add a human in the loop</td></tr>
+<tr><td><b>Data is poor / output hard to verify</b></td><td>Use AI for <b>augmentation</b> &mdash; generate options, human selects</td></tr>
+<tr><td><b>Only verification is hard</b></td><td>Automation is still possible, but <b>requires heavy investment in evaluation</b></td></tr>
+</table></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="exercise">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🗺️</div>
+            <div>
+              <div class="sc-tag">27 · Exercise</div>
+              <div class="sc-name">The class process-mapping exercise</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Students brought real processes from their own jobs and the room classified each one. This is the best
+single list of worked examples for choosing a project.</p>
+<table class="dt">
+<tr><th>Verdict</th><th>Process</th><th>Reasoning</th></tr>
+<tr><td><b>Automate</b></td><td>Weekly labor-charging reports (finance)</td><td>Low error risk, easy to verify, saves <b>~4 hrs/week</b>. Concern: sensitive salary and hours data.</td></tr>
+<tr><td><b>Automate</b></td><td>Invoice cross-referencing against vendor PDFs (banking)</td><td>Agent reads the PDF and checks it against the internal system. <b>Saves seven people's salaries.</b></td></tr>
+<tr><td><b>Hybrid</b></td><td>Quarterly VP budget-permission updates</td><td>Manual today and prone to human error; agentic guardrails could set permissions per fiscal quarter.</td></tr>
+<tr><td><b>Hybrid</b></td><td>Purchase orders / supply-chain replenishment (Red Bull)</td><td>Threshold-based reordering automated, humans on the edge cases &mdash; <b>an extra zero is catastrophic</b>.</td></tr>
+<tr><td><b>Augment</b></td><td>Facebook ad creative (marketing)</td><td>AI generates ten variants, human picks and edits. <b>Hard to verify what &ldquo;good&rdquo; even is.</b></td></tr>
+<tr><td><b>Augment</b></td><td>Legal contract review vs. company policy</td><td>Takes <b>3 months</b> today; in a test the LLM flagged the discrepancies in <b>1 minute</b> &mdash; and <b>leadership pushed back on adopting it</b>.</td></tr>
+</table>
+<div class="callout amber"><span class="c-label">The last row is the real lesson</span>
+<p>A 3-month process reduced to a minute, and it still did not get adopted. <b>The binding constraint was
+never the model.</b> Hold that thought for the change-management card.</p></div></div></div>
+      </div>
+
+      <div class="divider">Evaluation — where the real human work lives</div>
+
+      <div class="sc bl-accent" id="evalhard">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔬</div>
+            <div>
+              <div class="sc-tag">28 · Problem</div>
+              <div class="sc-name">Why evaluation is genuinely hard</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><ul>
+<li><b>Output is probabilistic.</b> Run the same input twice, get two different outputs. There is no fixed
+answer to diff against.</li>
+<li><b>No unit tests.</b> You cannot assert <i>input X always produces output Y</i>, because it does not.</li>
+<li><b>The science is unsettled.</b> Google, Anthropic and everyone else use <b>different methods and each
+claims theirs is best</b>. This is not a solved field you are failing to look up.</li>
+</ul>
+<div class="callout amber"><span class="c-label">The asymmetry to internalize</span>
+<p><b>Building is cheap</b> &mdash; Lovable plus n8n produces a working agent in hours. <b>Evaluation is expensive,
+slow, and where most of the real human work lives.</b> Which is exactly why it is 20% of the project grade
+and why it is the component teams under-invest in.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="proxima">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🏥</div>
+            <div>
+              <div class="sc-tag">29 · Case</div>
+              <div class="sc-name">The healthcare CRM case — Alex Lee as gold standard</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><h4>The setup</h4>
+<p>A medical-device sales company. Reps &mdash; Jordan, Marcus, Dana and others &mdash; <b>resist entering data into
+the CRM</b> after sales calls. Five agent prototypes were built to write the follow-up for them:
+<b>Agent Leopard, Agent Rhino, Agent Macaw, Agent Eagle, Agent Crocodile.</b></p>
+
+<div class="callout green"><span class="c-label">The gold standard</span>
+<p><b>Alex Lee</b> is the meticulous rep &mdash; detail-oriented, and <b>only a few months into the job, so still
+diligent</b> about CRM entries. <b>His outputs are the benchmark.</b> Note why he is the benchmark: not
+seniority, but <i>observable, consistent, high-quality output you can copy the shape of</i>.</p></div>
+
+<h4>The data you get</h4>
+<ul>
+<li><b>5 samples of Alex's actual conversations</b>, plus his summaries, next steps and follow-up emails.</li>
+<li><b>5 tabs of agent output</b> &mdash; one per prototype &mdash; with subject lines and email bodies.</li>
+</ul>
+<p>That is the whole evaluation problem in miniature: <b>a small set of expert examples, and a pile of
+candidate outputs to rank against them.</b></p></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="judge">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">⚖️</div>
+            <div>
+              <div class="sc-tag">30 · Method</div>
+              <div class="sc-name">Human eval vs. LLM-as-judge</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="anom-list">
+<div class="anom"><span class="anom-b ok">Human evaluation</span><span class="anom-text">
+Show the outputs to <b>Alex</b> and have him score them against his own standard.
+<b>+</b> ground truth from the domain expert. <b>&minus;</b> slow, expensive, <b>does not scale</b>.</span></div>
+<div class="anom"><span class="anom-b ok">LLM-as-judge (digital twin)</span><span class="anom-text">
+Build an n8n agent that <b>holds Alex's data as the gold standard</b> and have it evaluate every prototype's
+output against his style and content. Scales; needs to be built carefully.</span></div>
+</div>
+
+<h4>How the judge was built</h4>
+<ol>
+<li>Ask the LLM: <i>&ldquo;If I want to create a follow-up email like Alex, what should my system message be?&rdquo;</i>
+&rarr; it produces <b>detailed explicit rules</b> &mdash; always end with <b>&ldquo;Warm regards&rdquo;</b>, use this
+structure, keep it concise, and so on. <b>The gold standard gets turned into a written rubric by the model
+itself.</b></li>
+<li>Feed the judge <b>both</b> the derived system prompt <b>and</b> Alex's sample data.</li>
+<li>Ask it to <b>rank all five prototypes</b>.</li>
+</ol>
+
+<div class="callout green"><span class="c-label">Result in the demo</span>
+<p><b>Macaw and Eagle ranked highest</b> &mdash; consistent with the human evaluation, though not identical to it.
+&ldquo;Consistent but not identical&rdquo; is roughly the state of the art, and worth saying out loud in your video.</p></div>
+
+<div class="callout amber"><span class="c-label">The failure mode he demonstrated live</span>
+<p><b>On the first run the judge did not use Alex's data at all</b> &mdash; visible as <b>no green check mark on the
+tool call</b> in the execution log. It had to be told explicitly to <i>&ldquo;always use Alex Lee's data as the
+gold standard.&rdquo;</i> <b>Always verify tool use in the execution log. If the agent did not call the tool,
+the output is worthless no matter how good it reads.</b></p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="evalcriteria">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">📋</div>
+            <div>
+              <div class="sc-tag">31 · Rubric</div>
+              <div class="sc-name">Evaluation criteria and the improvement loop</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><h4>What to score on</h4>
+<table class="dt">
+<tr><th>Criterion</th><th>The question it asks</th></tr>
+<tr><td><b>Accuracy</b></td><td>Does the content match what was actually discussed?</td></tr>
+<tr><td><b>Relevance</b></td><td>Is the output appropriate to the context?</td></tr>
+<tr><td><b>Explainability</b></td><td>Can you tell <i>why</i> it said what it said? <b>Especially important in regulated industries.</b></td></tr>
+<tr><td><b>Tone &amp; style</b></td><td>Does it match the intended persona?</td></tr>
+<tr><td><b>Structure</b></td><td>Subject line, greeting, sign-off &mdash; does it follow the required format?</td></tr>
+<tr><td><b>Completeness</b></td><td>Are all required fields populated?</td></tr>
+</table>
+
+<h4>The loop</h4>
+<ol>
+<li><b>Baseline agent</b> &mdash; minimal system prompt, just the data.</li>
+<li><b>Evaluate</b> against the gold standard.</li>
+<li><b>Identify failure modes</b> &mdash; wrong tone, missing fields, hallucinated details.</li>
+<li><b>Update the system prompt</b> with explicit rules aimed at those failures.</li>
+<li><b>Re-evaluate. Repeat.</b></li>
+</ol>
+<div class="callout green"><span class="c-label">This is the deliverable</span>
+<p><b>This loop, documented, is component 3 of the project grade.</b> Keep the baseline output. Keep the
+failure list. Keep the prompt diffs. The before/after is the evidence &mdash; a claim that you
+&ldquo;iterated&rdquo; with nothing to show is worth nothing.</p></div></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="hipaa">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🛡️</div>
+            <div>
+              <div class="sc-tag">32 · Guardrails</div>
+              <div class="sc-name">HIPAA, and designing around the objection</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Recording sales conversations in healthcare is a <b>HIPAA risk</b>: a rep can mention a patient's condition
+in passing and now you have protected health information in a recording.</p>
+
+<div class="callout green"><span class="c-label">The design move</span>
+<p><b>Record an after-the-fact memo instead of the live conversation.</b> The rep dictates a summary <i>after</i>
+the call. Two things happen at once: <b>you stop capturing PHI</b>, and <b>Jordan gets more comfortable with
+adoption</b>. The privacy fix and the adoption fix are the same change.</p></div>
+
+<h4>Stacked guardrails</h4>
+<ul>
+<li><b>Transcription guardrail</b> &mdash; instruct the agent to <b>strip personal health information before storing</b>.</li>
+<li><b>Enterprise environment</b> &mdash; use enterprise-grade cloud, not personal ChatGPT accounts.</li>
+</ul>
+
+<div class="callout amber"><span class="c-label">The inversion worth stealing</span>
+<p>Reps are <b>already</b> pasting call notes into <b>personal ChatGPT accounts</b> &mdash; that is live data leakage
+happening today. So a proper deployment <b>centralizes the data and gives the company control over where it
+sits</b>. <b>It answers Morgan's data-governance objection as an improvement, not a new risk.</b>
+When someone raises governance, check what the unmanaged status quo already leaks.</p></div></div></div>
+      </div>
+
+      <div class="divider">Strategy — why any of this is worth money</div>
+
+      <div class="sc bl-accent" id="paradox">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🏰</div>
+            <div>
+              <div class="sc-tag">33 · Strategy</div>
+              <div class="sc-name">The paradox of access, and where moats come from</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="callout amber"><span class="c-label">The paradox</span>
+<p><b>AI improves productivity for everyone &mdash; and if everyone has the same models, prices fall and the
+gains go to customers, not companies.</b> Economics 101: commoditized tools create no competitive advantage.
+Deploying agents your competitors also deploy lowers cost and price industry-wide. <b>Good for society,
+neutral-to-negative for shareholders.</b></p></div>
+<p>The bottom tiers of intelligence &mdash; high-school-level tasks &mdash; are <b>already commoditized</b>, with
+American and Chinese models competing hard on price.</p>
+
+<h4>So where does advantage come from? Scarcity.</h4>
+<table class="dt">
+<tr><th>Moat</th><th>Example</th></tr>
+<tr><td><b>Proprietary weights</b></td><td>Anthropic's current position &mdash; others cannot replicate what the model does.</td></tr>
+<tr><td><b>Proprietary data</b></td><td>Data your competitors simply do not have.</td></tr>
+<tr><td><b>Network effects</b></td><td>Two-sided platforms &mdash; Uber (drivers + riders), Google (consumers + advertisers).</td></tr>
+<tr><td><b>Speed of execution</b></td><td>Small and nimble ships faster than an incumbent with more approval layers.</td></tr>
+</table>
+<p>The last fifty years of tech is largely one playbook run repeatedly: <b>build a societal platform with
+network effects.</b> <i>(Plug-and-play model switching and the pricing pressure it creates: deferred to Lecture 3.)</i></p></div></div>
+      </div>
+
+      <div class="sc bl-accent" id="adoption">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico">🔄</div>
+            <div>
+              <div class="sc-tag">34 · Adoption</div>
+              <div class="sc-name">Change management — the $1 : $4 rule</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="callout"><span class="c-label">The number to remember</span>
+<p><b>For every $1 spent on software, expect to spend $4 on change management.</b> From AI-transformation
+leaders at McKinsey and peers.</p></div>
+
+<p><b>Adoption is hard, and people resist for valid reasons</b> &mdash; job security, HIPAA, distrust of AI
+accuracy. The response is not to dismiss the objection:</p>
+<ol>
+<li><b>Understand it</b> through conversation.</li>
+<li><b>Design a guardrail that addresses it</b> &mdash; after-the-fact memos instead of live recording.</li>
+<li><b>Quantify the upside</b> &mdash; post-call admin from <b>15 minutes down to 5</b> per rep.</li>
+<li><b>Show the governance improvement</b> against the ad-hoc personal-ChatGPT status quo.</li>
+</ol>
+
+<div class="callout amber"><span class="c-label">The strategic vulnerability</span>
+<p>If you do not automate and <b>a lean competitor builds an agentic version of your business from scratch</b>,
+you are in a very difficult position. Lobel's line on what actually keeps CEOs and CFOs up:
+<b>&ldquo;a 28-year-old with a Lovable account&rdquo;</b> building a competitor that moves 10&times; faster.</p></div>
+<p><b>The balance he ended on:</b> AI makes mistakes, and humans sometimes do better &mdash; but
+<b>the competitive risk of inaction is real</b>, and it is the risk that does not show up on anyone's
+dashboard.</p></div></div>
+      </div>
+
+      <div class="divider">Reference</div>
+
+      <div class="sc bl-green" id="d6-hooks">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">🎯</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Project hooks — the day, mapped to the four grading components</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><p>Every idea from the session, sorted by which 20% it earns you.</p>
+
+<h4>1 · Problem &amp; value proposition</h4>
+<ol>
+<li><b>Pick from your own domain expertise</b> &mdash; you cannot argue a problem matters if it is not yours.</li>
+<li><b>Run it through the 2&times;2</b>: high ambiguity + low cost of error is the agent sweet spot; two of the four
+boxes say don't build an agent.</li>
+<li><b>Frame it as a process, not a project</b> &mdash; name the trigger or the schedule.</li>
+<li><b>Apply the three criteria</b>: low cost of error, clean data, easy to verify &mdash; and say which one is
+weakest and what you did about it.</li>
+<li><b>Quantify the upside</b> the way the class exercise did: hours per week, salaries, 15 minutes &rarr; 5.</li>
+</ol>
+
+<h4>2 · Agent design</h4>
+<ol start="6">
+<li><b>Automation / augmentation / hybrid</b> &mdash; state which archetype and why.</li>
+<li><b>Human in the loop = guardrail vs. bottleneck.</b> Say where you put the line and what it costs.</li>
+<li><b>System prompt under Options</b>, never in the prompt input field.</li>
+<li><b>List every tool explicitly in the system prompt</b> &mdash; it measurably improves tool selection.</li>
+<li><b>Expression fields</b> are what make a tool general instead of hardcoded.</li>
+<li><b>Orchestration is the lever</b> for managing stochasticity &mdash; more structure where errors are costly.</li>
+<li><b>Header auth on the webhook; password collected at runtime</b>, never hardcoded in the frontend.</li>
+</ol>
+
+<h4>3 · Evaluation</h4>
+<ol start="13">
+<li><b>Name a gold standard</b> &mdash; a person, or a set of known-good outputs. Alex Lee is the pattern.</li>
+<li><b>Derive the rubric from the gold standard</b> by asking the model what system prompt would reproduce it.</li>
+<li><b>LLM-as-judge</b> for scale, <b>human eval</b> for ground truth &mdash; the demo used both and they agreed
+roughly, not exactly.</li>
+<li><b>Verify the judge actually called its tools</b> &mdash; the green check in the execution log.</li>
+<li><b>Six criteria</b>: accuracy, relevance, explainability, tone, structure, completeness.</li>
+<li><b>Show the loop with receipts</b>: baseline &rarr; failure modes &rarr; prompt change &rarr; re-evaluation.</li>
+</ol>
+
+<h4>4 · Presentation</h4>
+<ol start="19">
+<li><b>Confirm the runtime</b> &mdash; today's brief said 5 minutes, the earlier spec said 8.</li>
+<li><b>Text in, text out.</b> No image or video inputs.</li>
+<li><b>Say the honest limits out loud</b> &mdash; what the agent is bad at is a graded question, not an admission.</li>
+</ol></div></div>
+      </div>
+
+      <div class="sc bl-green" id="d6-next">
+        <div class="sc-hdr" onclick="toggle(this)">
+          <div class="sc-hdr-l">
+            <div class="sc-ico green">🗓️</div>
+            <div>
+              <div class="sc-tag green">Reference</div>
+              <div class="sc-name">Next steps — deadlines from the session</div>
+            </div>
+          </div>
+          <span class="chevron">&#9660;</span>
+        </div>
+        <div class="sc-body"><div class="sc-in"><div class="anom-list">
+<div class="anom"><span class="anom-b bad">Today · Sat Aug 22</span><span class="anom-text">
+<b>Submit team composition to Nipun.</b> Teams of 3, self-selected.</span></div>
+<div class="anom"><span class="anom-b bad">Before next session</span><span class="anom-text">
+<b>Set up a working API key</b> &mdash; Google AI Studio (Gemini Flash, 500/day free), Groq, or $5 on
+<code>platform.openai.com</code>. The n8n free OpenAI credit is unreliable.</span></div>
+<div class="anom"><span class="anom-b ok">Before building</span><span class="anom-text">
+<b>Read and complete the Agent Design Worksheet</b> from Lecture 2 &mdash; it is submitted with the project.</span></div>
+<div class="anom"><span class="anom-b bad">Wed Sept 17 2026</span><span class="anom-text">
+<b>Deployed agent website + video due.</b> Lovable accounts expire <b>Sept 18</b> &mdash; one day later.</span></div>
+<div class="anom"><span class="anom-b ok">After</span><span class="anom-text">
+<b>Post the project on LinkedIn.</b></span></div>
+</div>
+<div class="callout amber"><span class="c-label">Two things to confirm with the team</span>
+<p><b>Video length</b> &mdash; 5 minutes (today) vs. 8 minutes (earlier spec). And <b>who physically presses
+submit</b>, named, before Sept 17.</p></div></div></div>
+      </div>
+
+    </div>
+
+    <div id="panel-assignments" class="day-panel">
+
+      <div class="divider">Foundations of AI Agents — graded components</div>
+
+      <div class="assign-card">
+        <div class="ac-ico">✅</div>
+        <div class="ac-b">
+          <div class="ac-label">Pre-module · 25%</div>
+          <div class="ac-title">Pre-module assignment<span class="done-badge">✓ in</span></div>
+          <div class="ac-desc">Submitted before the in-person day. A quarter of the course grade already banked.</div>
+          <div class="ac-due">Submitted <span>pre-module</span></div>
+        </div>
+      </div>
+
+      <div class="assign-card">
+        <div class="ac-ico">🙋</div>
+        <div class="ac-b">
+          <div class="ac-label">In class · 20%</div>
+          <div class="ac-title">Participation<span class="done-badge">✓ done</span></div>
+          <div class="ac-desc">Earned across the single Saturday session — the process-mapping exercise, the n8n build-along, and the evaluation case discussion.</div>
+          <div class="ac-due">Sat <span>Aug 22</span> · KMC 1-70</div>
+        </div>
+      </div>
+
+      <div class="assign-card">
+        <div class="ac-ico">🚀</div>
+        <div class="ac-b">
+          <div class="ac-label">Post-module · 55%</div>
+          <div class="ac-title">Deployed agent website + video</div>
+          <div class="ac-desc"><b>Teams of 3</b>, self-selected. Two artefacts: a <b>deployed agent website</b> (n8n backend, Lovable frontend) and a <b>video</b> walking through it. Graded in <b>four equal 20% components</b>: problem &amp; value proposition · agent design · evaluation work · presentation quality.<br><br><b>Only one of the four is the build.</b> Problem framing and evaluation together are 40% of the project and neither can be produced the night before. The <b>Agent Design Worksheet has no evaluation section</b> — that work is owed on top of it.<br><br>Text in, text out; avoid image and video inputs. Sample projects from the spring cohort are on the course website under <b>Projects</b>.</div>
+          <div class="ac-due">Due <span>Wed Sept 17 2026</span> · Lovable accounts expire <span>Sept 18</span></div>
+        </div>
+      </div>
+
+      <div class="callout"><span class="c-label">Due today</span>
+      <p><b>Team composition to Nipun — Sat Aug 22.</b> Teams of three; one team of two exists because 71
+      students are enrolled. Get at least one, ideally two, domain experts on the team — the evaluation
+      component is impossible without someone who can judge the output.</p></div>
+
+      <div class="callout amber"><span class="c-label">Confirm before you build</span>
+      <p><b>Video length:</b> today's brief said 5 minutes; the earlier written spec said 8. Check the course
+      website. <b>And name who presses submit</b>, before Sept 17 rather than on it.</p></div>
+
+      <div class="divider">Before the next session</div>
+
+      <div class="assign-card">
+        <div class="ac-ico">🔑</div>
+        <div class="ac-b">
+          <div class="ac-label">Setup</div>
+          <div class="ac-title">A working API key</div>
+          <div class="ac-desc">The <b>$5 OpenAI credit through n8n did not work reliably</b> in class. Fallbacks: <b>Google AI Studio</b> (free Gemini Flash key, 500 prompts/day), <b>Groq</b> (free key, his recommendation), or <b>$5 of API credit at platform.openai.com</b> — the developer platform, not the ChatGPT subscription. $10 lasted a whole spring semester of this work.</div>
+          <div class="ac-due">Needed before <span>the next session</span></div>
+        </div>
+      </div>
+
+      <div class="assign-card">
+        <div class="ac-ico">📐</div>
+        <div class="ac-b">
+          <div class="ac-label">Required reading</div>
+          <div class="ac-title">The Agent Design Worksheet</div>
+          <div class="ac-desc">Nine sections from Lecture 2 — objective, scenarios, features, tools, workflow, constraints, failure modes, persona, system prompt. <b>Submitted as part of the project.</b> Design before opening n8n; most people start from the workflow or the tools, which is backwards.</div>
+          <div class="ac-due">Submit <span>with the project</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY = 'notes-unlocked', PWD = 'huncho';
+if (sessionStorage.getItem(KEY) === 'true') unlock();
+document.getElementById('gate-input').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+function tryUnlock() {
+  if (document.getElementById('gate-input').value.trim().toLowerCase() === PWD) {
+    sessionStorage.setItem(KEY, 'true'); unlock();
+  } else {
+    document.getElementById('gate-err').textContent = 'wrong password';
+    document.getElementById('gate-input').value = '';
+  }
+}
+function unlock() {
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('sidebar').style.display = 'block';
+  document.getElementById('main').style.display = 'block';
+}
+function toggle(hdr) { hdr.closest('.sc').classList.toggle('open'); }
+document.querySelectorAll('.day-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.day-panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+  });
+});
+const navLinks = document.querySelectorAll('.sb-nav a[href^="#"]');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-25% 0px -65% 0px' });
+document.querySelectorAll('.sc[id]').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
